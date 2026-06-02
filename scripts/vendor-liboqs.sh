@@ -210,7 +210,13 @@ generate_bike_unity() {
             echo "#define LEVEL ${lvl}"
             echo "#define FUNC_PREFIX OQS_KEM_bike_l${lvl}"
             echo "#include \"functions_renaming.h\""
-            for f in "${files[@]}"; do echo "#include \"additional_r4/${f}\""; done
+            for f in "${files[@]}"; do
+                # utilities.c and gf2x_ksqr_portable.c both define BITS_IN_BYTE
+                # (8ULL vs (8)); equal values but concatenating them in one unity
+                # TU trips -Wmacro-redefined. Clear it before utilities.c.
+                if [ "$f" = "utilities.c" ]; then echo "#undef BITS_IN_BYTE"; fi
+                echo "#include \"additional_r4/${f}\""
+            done
         } > "$out"
         echo "  generated $out"
     done

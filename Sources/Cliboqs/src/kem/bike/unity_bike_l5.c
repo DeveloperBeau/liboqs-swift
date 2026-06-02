@@ -14,4 +14,5 @@
 #include "additional_r4/sampling.c"
 #include "additional_r4/sampling_portable.c"
 #include "additional_r4/shake_prf.c"
+#undef BITS_IN_BYTE
 #include "additional_r4/utilities.c"
