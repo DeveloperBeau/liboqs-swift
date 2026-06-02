@@ -72,8 +72,11 @@
 
 // --- SIG algorithms (portable/reference only) ---
 
-// ML-DSA disabled: ref dirs have duplicate filenames incompatible with SPM.
-// #define OQS_ENABLE_SIG_ML_DSA 1
+// ML-DSA enabled via unity translation units (see Package.swift / vendor-liboqs.sh).
+// Spike scope: only ML-DSA-44 has a unity TU + glue compiled; 65/87 remain
+// undefined here so sig.c does not reference their (not-yet-unitied) glue.
+#define OQS_ENABLE_SIG_ML_DSA 1
+#define OQS_ENABLE_SIG_ml_dsa_44 1
 
 #define OQS_ENABLE_SIG_FALCON 1
 #define OQS_ENABLE_SIG_falcon_512 1

@@ -124,8 +124,14 @@ let cliboqsExclude: [String] = [
     // SNOVA disabled in oqsconfig.h (duplicate filenames)
     "src/sig/snova",
 
-    // ML-DSA disabled in oqsconfig.h (duplicate filenames)
-    "src/sig/ml_dsa",
+    // ML-DSA spike: compile only sig_ml_dsa_44.c + unity_ml_dsa_44_ref.c.
+    // Excluding a dir stops SPM compiling its .c as separate TUs; the files
+    // stay on disk so the unity #include reaches them.
+    "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-44_ref",  // compiled via unity
+    "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-65_ref",
+    "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-87_ref",
+    "src/sig/ml_dsa/sig_ml_dsa_65.c",
+    "src/sig/ml_dsa/sig_ml_dsa_87.c",
 
     // UOV (requires OpenSSL, disabled)
     "src/sig/uov",
