@@ -64,6 +64,27 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
         #expect(valid)
     }
 
+    @Test("ML-DSA-44 sign/verify")
+    func roundTripMLDSA44() throws {
+        let key = try MLDSA44.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("ML-DSA-65 sign/verify")
+    func roundTripMLDSA65() throws {
+        let key = try MLDSA65.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("ML-DSA-87 sign/verify")
+    func roundTripMLDSA87() throws {
+        let key = try MLDSA87.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
     // MARK: - Empty message
 
     @Test("Sign and verify empty message")

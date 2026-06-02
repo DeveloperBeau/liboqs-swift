@@ -214,6 +214,15 @@ import Foundation
     @Test("SLH-DSA-Pure-SHAKE-256f keygen")
     func slhDSAPureSHAKE256f() throws { _ = try SLHDSAPureSHAKE256f.PrivateKey() }
 
+    // MARK: - Signature key generation: ML-DSA
+
+    @Test("ML-DSA-44 keygen")
+    func mldsa44() throws { _ = try MLDSA44.PrivateKey() }
+    @Test("ML-DSA-65 keygen")
+    func mldsa65() throws { _ = try MLDSA65.PrivateKey() }
+    @Test("ML-DSA-87 keygen")
+    func mldsa87() throws { _ = try MLDSA87.PrivateKey() }
+
     // MARK: - Error descriptions
 
     @Test("All OQSError cases produce non-empty descriptions")
