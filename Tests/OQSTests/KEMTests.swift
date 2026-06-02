@@ -110,6 +110,54 @@ import Foundation
         #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
     }
 
+    @Test("NTRU-HPS-2048-509 round-trip")
+    func roundTripNTRUHPS2048509() throws {
+        let sk = try NTRUHPS2048509.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HPS-2048-677 round-trip")
+    func roundTripNTRUHPS2048677() throws {
+        let sk = try NTRUHPS2048677.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HPS-4096-821 round-trip")
+    func roundTripNTRUHPS4096821() throws {
+        let sk = try NTRUHPS4096821.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HPS-4096-1229 round-trip")
+    func roundTripNTRUHPS40961229() throws {
+        let sk = try NTRUHPS40961229.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HRSS-701 round-trip")
+    func roundTripNTRUHRSS701() throws {
+        let sk = try NTRUHRSS701.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HRSS-1373 round-trip")
+    func roundTripNTRUHRSS1373() throws {
+        let sk = try NTRUHRSS1373.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
     // MARK: - Key pair uniqueness
 
     @Test("Key pairs are unique")

@@ -45,6 +45,21 @@ import Foundation
     @Test("FrodoKEM-1344-SHAKE keygen")
     func frodo1344SHAKE() throws { _ = try FrodoKEM1344SHAKE.PrivateKey() }
 
+    // MARK: - KEM key generation: NTRU
+
+    @Test("NTRU-HPS-2048-509 keygen")
+    func ntruHPS2048509() throws { _ = try NTRUHPS2048509.PrivateKey() }
+    @Test("NTRU-HPS-2048-677 keygen")
+    func ntruHPS2048677() throws { _ = try NTRUHPS2048677.PrivateKey() }
+    @Test("NTRU-HPS-4096-821 keygen")
+    func ntruHPS4096821() throws { _ = try NTRUHPS4096821.PrivateKey() }
+    @Test("NTRU-HPS-4096-1229 keygen")
+    func ntruHPS40961229() throws { _ = try NTRUHPS40961229.PrivateKey() }
+    @Test("NTRU-HRSS-701 keygen")
+    func ntruHRSS701() throws { _ = try NTRUHRSS701.PrivateKey() }
+    @Test("NTRU-HRSS-1373 keygen")
+    func ntruHRSS1373() throws { _ = try NTRUHRSS1373.PrivateKey() }
+
     // MARK: - Signature key generation: Falcon
 
     @Test("Falcon-512 keygen")
