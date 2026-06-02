@@ -27,6 +27,10 @@ import Foundation
     @Test("Classic McEliece 348864 keygen")
     func classicMcEliece348864() throws { _ = try ClassicMcEliece348864.PrivateKey() }
 
+    @Test("Classic McEliece 348864f keygen")
+    func classicMcEliece348864f() throws { _ = try ClassicMcEliece348864f.PrivateKey() }
+    // 460896f+ omitted from CI keygen for memory; types compile and share the 348864f path.
+
     // Classic McEliece 460896+ variants require too much memory for CI keygen.
     // Their types compile and share the same internal path as 348864.
 

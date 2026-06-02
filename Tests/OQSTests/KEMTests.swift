@@ -62,6 +62,14 @@ import Foundation
         #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
     }
 
+    @Test("Classic McEliece 348864f round-trip")
+    func roundTripMcEliece348864f() throws {
+        let sk = try ClassicMcEliece348864f.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
     @Test("FrodoKEM-640-AES round-trip")
     func roundTripFrodo640AES() throws {
         let sk = try FrodoKEM640AES.PrivateKey()
