@@ -27,8 +27,10 @@ jobs:
       - uses: DeveloperBeau/setup-swift@v1
       - name: Build
         run: swift build -v
-      - name: Test
-        run: swift test -v
+      - name: Test (parallel bulk, excludes KAT)
+        run: swift test -v --skip KATTests
+      - name: Test (deterministic KAT, serial)
+        run: swift test -v --no-parallel --filter KATTests
 
   android:
     name: Android

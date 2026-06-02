@@ -49,7 +49,8 @@ jobs:
         if: steps.compare.outputs.update_available == 'true'
         run: |
           swift build -v
-          swift test -v
+          swift test -v --skip KATTests
+          swift test -v --no-parallel --filter KATTests
 
       - name: Create PR
         if: steps.compare.outputs.update_available == 'true'
