@@ -61,9 +61,13 @@
 #define OQS_ENABLE_KEM_hqc_192 1
 #define OQS_ENABLE_KEM_hqc_256 1
 
-// Kyber disabled: deprecated (replaced by ML-KEM) and ref dirs have
-// duplicate filenames incompatible with SPM.
-// #define OQS_ENABLE_KEM_KYBER 1
+// Kyber (deprecated, replaced by ML-KEM) enabled via generated unity TUs
+// (see Package.swift / vendor-liboqs.sh). Each variant's KYBER_K is baked
+// into its unity TU since SPM cannot pass per-file -DKYBER_K=N.
+#define OQS_ENABLE_KEM_KYBER 1
+#define OQS_ENABLE_KEM_kyber_512 1
+#define OQS_ENABLE_KEM_kyber_768 1
+#define OQS_ENABLE_KEM_kyber_1024 1
 
 #define OQS_ENABLE_KEM_ML_KEM 1
 #define OQS_ENABLE_KEM_ml_kem_512 1
@@ -72,11 +76,13 @@
 
 // --- SIG algorithms (portable/reference only) ---
 
-// ML-DSA enabled via unity translation units (see Package.swift / vendor-liboqs.sh).
-// Spike scope: only ML-DSA-44 has a unity TU + glue compiled; 65/87 remain
-// undefined here so sig.c does not reference their (not-yet-unitied) glue.
+// ML-DSA enabled via generated unity translation units (see Package.swift /
+// vendor-liboqs.sh). Each variant's _ref dir is compiled through one unity TU
+// alongside its sig_ml_dsa_*.c glue.
 #define OQS_ENABLE_SIG_ML_DSA 1
 #define OQS_ENABLE_SIG_ml_dsa_44 1
+#define OQS_ENABLE_SIG_ml_dsa_65 1
+#define OQS_ENABLE_SIG_ml_dsa_87 1
 
 #define OQS_ENABLE_SIG_FALCON 1
 #define OQS_ENABLE_SIG_falcon_512 1
@@ -125,8 +131,23 @@
 // UOV disabled: requires OpenSSL
 // #define OQS_ENABLE_SIG_UOV 1
 
-// SNOVA disabled: opt dirs have duplicate filenames incompatible with SPM.
-// #define OQS_ENABLE_SIG_SNOVA 1
+// SNOVA enabled via generated unity TUs (see Package.swift / vendor-liboqs.sh).
+// Each variant's _opt dir is compiled through one unity TU that bakes in its
+// v/o/l + sk_is_seed + PK_EXPAND_SHAKE + OPTIMISATION (SPM cannot pass them
+// per-file) alongside its sig_snova_SNOVA_*.c glue.
+#define OQS_ENABLE_SIG_SNOVA 1
+#define OQS_ENABLE_SIG_snova_SNOVA_24_5_4 1
+#define OQS_ENABLE_SIG_snova_SNOVA_24_5_4_SHAKE 1
+#define OQS_ENABLE_SIG_snova_SNOVA_24_5_4_esk 1
+#define OQS_ENABLE_SIG_snova_SNOVA_24_5_4_SHAKE_esk 1
+#define OQS_ENABLE_SIG_snova_SNOVA_37_17_2 1
+#define OQS_ENABLE_SIG_snova_SNOVA_25_8_3 1
+#define OQS_ENABLE_SIG_snova_SNOVA_56_25_2 1
+#define OQS_ENABLE_SIG_snova_SNOVA_49_11_3 1
+#define OQS_ENABLE_SIG_snova_SNOVA_37_8_4 1
+#define OQS_ENABLE_SIG_snova_SNOVA_24_5_5 1
+#define OQS_ENABLE_SIG_snova_SNOVA_60_10_4 1
+#define OQS_ENABLE_SIG_snova_SNOVA_29_6_5 1
 
 #define OQS_ENABLE_SIG_SLH_DSA 1
 #define OQS_ENABLE_SIG_slh_dsa_pure_sha2_128s 1
