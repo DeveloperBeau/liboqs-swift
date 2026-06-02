@@ -326,4 +326,15 @@ import Foundation
             try privateKey.decryptSharedSecret(extended)
         }
     }
+
+    @Test("FrodoKEM-640-AES rejects wrong-size key import")
+    func frodo640AESInvalidSize() {
+        #expect(throws: OQSError.self) {
+            try FrodoKEM640AES.PrivateKey(rawRepresentation: Data([0x00]),
+                                          publicKeyRepresentation: Data([0x00]))
+        }
+        #expect(throws: OQSError.self) {
+            _ = try FrodoKEM640AES.PublicKey(rawRepresentation: Data([0x00]))
+        }
+    }
 }

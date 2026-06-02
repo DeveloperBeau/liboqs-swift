@@ -27,7 +27,7 @@ internal import Cliboqs
 /// // Anyone with the public key can verify.
 /// let legit = try signer.publicKey.isValidSignature(sig, for: messageData)
 /// ```
-public enum SLHDSA {
+public enum SLHDSA: Sendable {
     /// A parameterized SLH-DSA pre-hash signature scheme.
     ///
     /// Combine a ``Function`` and a ``ParamSet`` to select one of the 144

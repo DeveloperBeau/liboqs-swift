@@ -215,4 +215,28 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
             _ = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_256, paramSet: ps)
         }
     }
+
+    @Test("SLH-DSA prehash key import round-trip")
+    func prehashKeyImport() throws {
+        let key = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_256, paramSet: .sha2_128f)
+        let imported = try SLHDSA.Prehash.PrivateKey(
+            prehash: .sha2_256, paramSet: .sha2_128f,
+            rawRepresentation: key.rawRepresentation,
+            publicKeyRepresentation: key.publicKey.rawRepresentation
+        )
+        #expect(imported.rawRepresentation == key.rawRepresentation)
+        let sig = try imported.signature(for: testMessage)
+        #expect(try imported.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("SLH-DSA prehash key import rejects wrong size")
+    func prehashKeyImportInvalidSize() {
+        #expect(throws: OQSError.self) {
+            try SLHDSA.Prehash.PrivateKey(
+                prehash: .sha2_256, paramSet: .sha2_128f,
+                rawRepresentation: Data([0x00]),
+                publicKeyRepresentation: Data([0x00])
+            )
+        }
+    }
 }
