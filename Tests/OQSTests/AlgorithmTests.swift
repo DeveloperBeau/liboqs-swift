@@ -223,6 +223,18 @@ import Foundation
     @Test("ML-DSA-87 keygen")
     func mldsa87() throws { _ = try MLDSA87.PrivateKey() }
 
+    // MARK: - KEM key generation: Kyber (deprecated)
+
+    @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")
+    @Test("Kyber512 keygen")
+    func kyber512() throws { _ = try Kyber512.PrivateKey() }
+    @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")
+    @Test("Kyber768 keygen")
+    func kyber768() throws { _ = try Kyber768.PrivateKey() }
+    @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")
+    @Test("Kyber1024 keygen")
+    func kyber1024() throws { _ = try Kyber1024.PrivateKey() }
+
     // MARK: - Error descriptions
 
     @Test("All OQSError cases produce non-empty descriptions")

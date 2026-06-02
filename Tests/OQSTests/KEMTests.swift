@@ -174,6 +174,33 @@ import Foundation
         #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
     }
 
+    @available(*, deprecated, message: "Exercises deprecated Kyber512 on purpose")
+    @Test("Kyber512 round-trip")
+    func roundTripKyber512() throws {
+        let sk = try Kyber512.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @available(*, deprecated, message: "Exercises deprecated Kyber768 on purpose")
+    @Test("Kyber768 round-trip")
+    func roundTripKyber768() throws {
+        let sk = try Kyber768.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @available(*, deprecated, message: "Exercises deprecated Kyber1024 on purpose")
+    @Test("Kyber1024 round-trip")
+    func roundTripKyber1024() throws {
+        let sk = try Kyber1024.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
     // MARK: - Key pair uniqueness
 
     @Test("Key pairs are unique")
