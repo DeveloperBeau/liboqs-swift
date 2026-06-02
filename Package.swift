@@ -144,8 +144,46 @@ let cliboqsExclude: [String] = [
     "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-65_ref",
     "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-87_ref",
 
-    // UOV (requires OpenSSL, disabled)
-    "src/sig/uov",
+    // UOV: each _ref dir is compiled via its generated unity TU (which bakes in
+    // the param triple + backend + _UTILS_OQS_ defines); the raw variant dirs
+    // are excluded so SPM does not compile their .c as separate TUs, and the
+    // avx2/neon dirs are unused. The sig_uov_ov_*.c glue compiles normally.
+    "src/sig/uov/pqov_ov_Is_ref",
+    "src/sig/uov/pqov_ov_Is_avx2",
+    "src/sig/uov/pqov_ov_Is_neon",
+    "src/sig/uov/pqov_ov_Ip_ref",
+    "src/sig/uov/pqov_ov_Ip_avx2",
+    "src/sig/uov/pqov_ov_Ip_neon",
+    "src/sig/uov/pqov_ov_III_ref",
+    "src/sig/uov/pqov_ov_III_avx2",
+    "src/sig/uov/pqov_ov_III_neon",
+    "src/sig/uov/pqov_ov_V_ref",
+    "src/sig/uov/pqov_ov_V_avx2",
+    "src/sig/uov/pqov_ov_V_neon",
+    "src/sig/uov/pqov_ov_Is_pkc_ref",
+    "src/sig/uov/pqov_ov_Is_pkc_avx2",
+    "src/sig/uov/pqov_ov_Is_pkc_neon",
+    "src/sig/uov/pqov_ov_Ip_pkc_ref",
+    "src/sig/uov/pqov_ov_Ip_pkc_avx2",
+    "src/sig/uov/pqov_ov_Ip_pkc_neon",
+    "src/sig/uov/pqov_ov_III_pkc_ref",
+    "src/sig/uov/pqov_ov_III_pkc_avx2",
+    "src/sig/uov/pqov_ov_III_pkc_neon",
+    "src/sig/uov/pqov_ov_V_pkc_ref",
+    "src/sig/uov/pqov_ov_V_pkc_avx2",
+    "src/sig/uov/pqov_ov_V_pkc_neon",
+    "src/sig/uov/pqov_ov_Is_pkc_skc_ref",
+    "src/sig/uov/pqov_ov_Is_pkc_skc_avx2",
+    "src/sig/uov/pqov_ov_Is_pkc_skc_neon",
+    "src/sig/uov/pqov_ov_Ip_pkc_skc_ref",
+    "src/sig/uov/pqov_ov_Ip_pkc_skc_avx2",
+    "src/sig/uov/pqov_ov_Ip_pkc_skc_neon",
+    "src/sig/uov/pqov_ov_III_pkc_skc_ref",
+    "src/sig/uov/pqov_ov_III_pkc_skc_avx2",
+    "src/sig/uov/pqov_ov_III_pkc_skc_neon",
+    "src/sig/uov/pqov_ov_V_pkc_skc_ref",
+    "src/sig/uov/pqov_ov_V_pkc_skc_avx2",
+    "src/sig/uov/pqov_ov_V_pkc_skc_neon",
 
     // MAYO opt variants build via generated unity_*.c TUs; the raw opt dirs are
     // excluded (their .c files are #included into the unity TU instead) and the

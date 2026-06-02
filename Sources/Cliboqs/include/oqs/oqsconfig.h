@@ -137,8 +137,24 @@
 #define OQS_ENABLE_SIG_cross_rsdpg_256_fast 1
 #define OQS_ENABLE_SIG_cross_rsdpg_256_small 1
 
-// UOV disabled: requires OpenSSL
-// #define OQS_ENABLE_SIG_UOV 1
+// UOV enabled via generated unity TUs using the bundled liboqs SHA3 backend
+// (_UTILS_OQS_, <oqs/sha3.h>) rather than OpenSSL, so the package stays
+// dependency-free. Each variant's _ref dir is compiled through one unity TU
+// that bakes in its param triple + backend (_OV_CLASSIC/_OV_PKC/_OV_PKC_SKC)
+// + _UTILS_OQS_ alongside its sig_uov_ov_*.c glue.
+#define OQS_ENABLE_SIG_UOV 1
+#define OQS_ENABLE_SIG_uov_ov_Is 1
+#define OQS_ENABLE_SIG_uov_ov_Ip 1
+#define OQS_ENABLE_SIG_uov_ov_III 1
+#define OQS_ENABLE_SIG_uov_ov_V 1
+#define OQS_ENABLE_SIG_uov_ov_Is_pkc 1
+#define OQS_ENABLE_SIG_uov_ov_Ip_pkc 1
+#define OQS_ENABLE_SIG_uov_ov_III_pkc 1
+#define OQS_ENABLE_SIG_uov_ov_V_pkc 1
+#define OQS_ENABLE_SIG_uov_ov_Is_pkc_skc 1
+#define OQS_ENABLE_SIG_uov_ov_Ip_pkc_skc 1
+#define OQS_ENABLE_SIG_uov_ov_III_pkc_skc 1
+#define OQS_ENABLE_SIG_uov_ov_V_pkc_skc 1
 
 // SNOVA enabled via generated unity TUs (see Package.swift / vendor-liboqs.sh).
 // Each variant's _opt dir is compiled through one unity TU that bakes in its

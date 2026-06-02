@@ -171,6 +171,25 @@ generate_unity "src/sig/mayo" "pqmayo_mayo-2_opt" "MAYO_VARIANT MAYO_2" "MAYO_BU
 generate_unity "src/sig/mayo" "pqmayo_mayo-3_opt" "MAYO_VARIANT MAYO_3" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL" "HAVE_STACKEFFICIENT"
 generate_unity "src/sig/mayo" "pqmayo_mayo-5_opt" "MAYO_VARIANT MAYO_5" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL" "HAVE_STACKEFFICIENT"
 
+# UOV (oil-and-vinegar) variants select their param triple (_OVk_v_o), public-
+# key/secret-key compression mode (_OV_CLASSIC / _OV_PKC / _OV_PKC_SKC), and
+# hash backend from CMake -D flags. We pin _UTILS_OQS_ so utils_hash.c uses
+# liboqs's bundled SHA3 (<oqs/sha3.h>) instead of OpenSSL, keeping the package
+# dependency-free. UOV quote-includes its own variant-local headers, so no
+# localize_includes is needed. Values mirror src/sig/uov/CMakeLists.txt.
+generate_unity "src/sig/uov" "pqov_ov_Is_ref"           "_OV16_160_64"  "_OV_CLASSIC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Ip_ref"           "_OV256_112_44" "_OV_CLASSIC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_III_ref"          "_OV256_184_72" "_OV_CLASSIC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_V_ref"            "_OV256_244_96" "_OV_CLASSIC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Is_pkc_ref"       "_OV16_160_64"  "_OV_PKC"      "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Ip_pkc_ref"       "_OV256_112_44" "_OV_PKC"      "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_III_pkc_ref"      "_OV256_184_72" "_OV_PKC"      "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_V_pkc_ref"        "_OV256_244_96" "_OV_PKC"      "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Is_pkc_skc_ref"   "_OV16_160_64"  "_OV_PKC_SKC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Ip_pkc_skc_ref"   "_OV256_112_44" "_OV_PKC_SKC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_III_pkc_skc_ref"  "_OV256_184_72" "_OV_PKC_SKC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_V_pkc_skc_ref"    "_OV256_244_96" "_OV_PKC_SKC"  "_UTILS_OQS_"
+
 # BIKE keeps ALL sources in one additional_r4 dir, compiled three times with a
 # different LEVEL/FUNC_PREFIX (CMake -DLEVEL=N -DFUNC_PREFIX=OQS_KEM_bike_lN).
 # Emit one unity TU per level that bakes in those defines, force-includes
