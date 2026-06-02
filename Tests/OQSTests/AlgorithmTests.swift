@@ -68,6 +68,15 @@ import Foundation
     @Test("sntrup761 keygen")
     func sntrup761() throws { _ = try SNTRUP761.PrivateKey() }
 
+    // MARK: - KEM key generation: BIKE
+
+    @Test("BIKE-L1 keygen")
+    func bikeL1() throws { _ = try BIKEL1.PrivateKey() }
+    @Test("BIKE-L3 keygen")
+    func bikeL3() throws { _ = try BIKEL3.PrivateKey() }
+    @Test("BIKE-L5 keygen")
+    func bikeL5() throws { _ = try BIKEL5.PrivateKey() }
+
     // MARK: - Signature key generation: Falcon
 
     @Test("Falcon-512 keygen")

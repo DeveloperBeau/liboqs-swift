@@ -91,4 +91,15 @@ import Foundation
         let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "SNOVA_24_5_4")))
     }
+
+    @Test("BIKE-L1 KAT digest matches committed hash")
+    func bikeL1KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let sk = try BIKEL1.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "BIKE-L1")))
+    }
 }

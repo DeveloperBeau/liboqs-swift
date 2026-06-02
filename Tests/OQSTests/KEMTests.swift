@@ -364,4 +364,28 @@ import Foundation
             _ = try FrodoKEM640AES.PublicKey(rawRepresentation: Data([0x00]))
         }
     }
+
+    @Test("BIKE-L1 round-trip")
+    func roundTripBIKEL1() throws {
+        let sk = try BIKEL1.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("BIKE-L3 round-trip")
+    func roundTripBIKEL3() throws {
+        let sk = try BIKEL3.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("BIKE-L5 round-trip")
+    func roundTripBIKEL5() throws {
+        let sk = try BIKEL5.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
 }
