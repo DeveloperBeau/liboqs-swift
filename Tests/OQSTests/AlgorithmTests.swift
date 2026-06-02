@@ -30,6 +30,21 @@ import Foundation
     // Classic McEliece 460896+ variants require too much memory for CI keygen.
     // Their types compile and share the same internal path as 348864.
 
+    // MARK: - KEM key generation: FrodoKEM
+
+    @Test("FrodoKEM-640-AES keygen")
+    func frodo640AES() throws { _ = try FrodoKEM640AES.PrivateKey() }
+    @Test("FrodoKEM-640-SHAKE keygen")
+    func frodo640SHAKE() throws { _ = try FrodoKEM640SHAKE.PrivateKey() }
+    @Test("FrodoKEM-976-AES keygen")
+    func frodo976AES() throws { _ = try FrodoKEM976AES.PrivateKey() }
+    @Test("FrodoKEM-976-SHAKE keygen")
+    func frodo976SHAKE() throws { _ = try FrodoKEM976SHAKE.PrivateKey() }
+    @Test("FrodoKEM-1344-AES keygen")
+    func frodo1344AES() throws { _ = try FrodoKEM1344AES.PrivateKey() }
+    @Test("FrodoKEM-1344-SHAKE keygen")
+    func frodo1344SHAKE() throws { _ = try FrodoKEM1344SHAKE.PrivateKey() }
+
     // MARK: - Signature key generation: Falcon
 
     @Test("Falcon-512 keygen")

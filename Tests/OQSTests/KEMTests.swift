@@ -62,6 +62,54 @@ import Foundation
         #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
     }
 
+    @Test("FrodoKEM-640-AES round-trip")
+    func roundTripFrodo640AES() throws {
+        let sk = try FrodoKEM640AES.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-640-SHAKE round-trip")
+    func roundTripFrodo640SHAKE() throws {
+        let sk = try FrodoKEM640SHAKE.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-976-AES round-trip")
+    func roundTripFrodo976AES() throws {
+        let sk = try FrodoKEM976AES.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-976-SHAKE round-trip")
+    func roundTripFrodo976SHAKE() throws {
+        let sk = try FrodoKEM976SHAKE.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-1344-AES round-trip")
+    func roundTripFrodo1344AES() throws {
+        let sk = try FrodoKEM1344AES.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-1344-SHAKE round-trip")
+    func roundTripFrodo1344SHAKE() throws {
+        let sk = try FrodoKEM1344SHAKE.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
     // MARK: - Key pair uniqueness
 
     @Test("Key pairs are unique")

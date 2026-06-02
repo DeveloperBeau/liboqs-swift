@@ -17,4 +17,15 @@ import Foundation
         let expected = try KATHashes.shared.hash(for: "ML-KEM-512")
         #expect(digest == expected)
     }
+
+    @Test("FrodoKEM-640-AES KAT digest matches committed hash")
+    func frodo640aesKAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let sk = try FrodoKEM640AES.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "FrodoKEM-640-AES")))
+    }
 }
