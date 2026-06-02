@@ -64,6 +64,14 @@ for dir in "$LIBOQS_SRC"/sig/*/; do
     done
 done
 
+# Fetch upstream KAT hash manifests for cross-checking (best-effort, reference-only).
+# Kept OUTSIDE Tests/OQSTests/Vectors so the test bundle stays small.
+KAT_DIR="$REPO_ROOT/Tests/OQSTests/UpstreamKATs"
+mkdir -p "$KAT_DIR"
+if [ -d "$TMPDIR/liboqs-$VERSION/tests/KATs" ]; then
+    cp -R "$TMPDIR/liboqs-$VERSION/tests/KATs" "$KAT_DIR/" 2>/dev/null || true
+fi
+
 rm -rf "$TMPDIR"
 
 # Restore oqsconfig.h

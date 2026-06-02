@@ -222,6 +222,7 @@ let package = Package(
         .testTarget(
             name: "OQSTests",
             dependencies: ["OQS"],
+            resources: [.copy("Vectors")],
             swiftSettings: experimentalFeatures
         ),
     ]
