@@ -277,6 +277,33 @@ import Foundation
     @Test("MAYO-3 keygen")
     func mayo3() throws { _ = try MAYO3.PrivateKey() }
 
+    // MARK: - Signature key generation: UOV
+
+    @Test("OV-Is keygen")
+    func ovIs() throws { _ = try OVIs.PrivateKey() }
+    @Test("OV-Ip keygen")
+    func ovIp() throws { _ = try OVIp.PrivateKey() }
+    @Test("OV-III keygen")
+    func ovIII() throws { _ = try OVIII.PrivateKey() }
+    @Test("OV-V keygen")
+    func ovV() throws { _ = try OVV.PrivateKey() }
+    @Test("OV-Is-pkc keygen")
+    func ovIsPKC() throws { _ = try OVIsPKC.PrivateKey() }
+    @Test("OV-Ip-pkc keygen")
+    func ovIpPKC() throws { _ = try OVIpPKC.PrivateKey() }
+    @Test("OV-III-pkc keygen")
+    func ovIIIPKC() throws { _ = try OVIIIPKC.PrivateKey() }
+    @Test("OV-V-pkc keygen")
+    func ovVPKC() throws { _ = try OVVPKC.PrivateKey() }
+    @Test("OV-Is-pkc-skc keygen")
+    func ovIsPKCSKC() throws { _ = try OVIsPKCSKC.PrivateKey() }
+    @Test("OV-Ip-pkc-skc keygen")
+    func ovIpPKCSKC() throws { _ = try OVIpPKCSKC.PrivateKey() }
+    @Test("OV-III-pkc-skc keygen")
+    func ovIIIPKCSKC() throws { _ = try OVIIIPKCSKC.PrivateKey() }
+    @Test("OV-V-pkc-skc keygen")
+    func ovVPKCSKC() throws { _ = try OVVPKCSKC.PrivateKey() }
+
     // MARK: - KEM key generation: Kyber (deprecated)
 
     @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")

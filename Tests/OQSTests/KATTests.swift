@@ -92,6 +92,16 @@ import Foundation
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "SNOVA_24_5_4")))
     }
 
+    @Test("OV-Is KAT digest matches committed hash")
+    func ovIsKAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let key = try OVIs.PrivateKey()
+        let sig = try key.signature(for: Data("KAT".utf8))
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "OV-Is")))
+    }
+
     @Test("BIKE-L1 KAT digest matches committed hash")
     func bikeL1KAT() throws {
         KAT.seedDeterministicRNG()
