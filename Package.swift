@@ -171,8 +171,9 @@ let cliboqsExclude: [String] = [
     "src/kem/ml_kem/icicle_ml-kem-768_icicle_cuda",
     "src/kem/ml_kem/icicle_ml-kem-1024_icicle_cuda",
 
-    // BIKE disabled in oqsconfig.h (per-level compile defs)
-    "src/kem/bike",
+    // BIKE: raw sources compiled via per-level unity TUs (unity_bike_l*.c);
+    // exclude the raw dir so SPM does not compile its files separately.
+    "src/kem/bike/additional_r4",
 
     // FrodoKEM: files that are textually #included by other .c files
     "src/kem/frodokem/external/noise.c",

@@ -21,9 +21,13 @@
 
 // --- KEM algorithms (portable/reference only) ---
 
-// BIKE disabled: each level requires different compile-time LEVEL and
-// FUNC_PREFIX definitions, incompatible with SPM.
-// #define OQS_ENABLE_KEM_BIKE 1
+// BIKE: each level requires different compile-time LEVEL and FUNC_PREFIX
+// definitions; built via per-level unity translation units (see Package.swift
+// and scripts/vendor-liboqs.sh).
+#define OQS_ENABLE_KEM_BIKE 1
+#define OQS_ENABLE_KEM_bike_l1 1
+#define OQS_ENABLE_KEM_bike_l3 1
+#define OQS_ENABLE_KEM_bike_l5 1
 
 #define OQS_ENABLE_KEM_FRODOKEM 1
 #define OQS_ENABLE_KEM_frodokem_640_aes 1
