@@ -3,7 +3,7 @@
 #ifndef api_h
 #define api_h
 
-#include <mayo.h>
+#include "mayo.h"
 
 #define CRYPTO_SECRETKEYBYTES 32
 #define CRYPTO_PUBLICKEYBYTES 2986

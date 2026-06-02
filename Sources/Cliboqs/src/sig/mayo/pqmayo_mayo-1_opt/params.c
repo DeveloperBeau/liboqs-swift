@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-#include <mayo.h>
+#include "mayo.h"
 
 #ifdef ENABLE_PARAMS_DYNAMIC
 static const unsigned char f_tail_64[] = F_TAIL_64;

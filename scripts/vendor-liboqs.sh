@@ -99,6 +99,39 @@ generate_unity() {
 # -DDILITHIUM_MODE=N). config.h defaults it to 2 (ML-DSA-44) under #ifndef, so
 # 65/87 must override it or they emit ML-DSA-44's symbols. Values mirror
 # src/sig/ml_dsa/CMakeLists.txt.
+# localize_includes <family_dir> <variant_dir_glob>
+# Rewrites `#include <X.h>` -> `#include "X.h"` in every .c/.h inside each
+# matching variant dir, but ONLY when X.h actually exists in that same dir.
+# MAYO angle-includes its own variant-local headers (mayo.h, api.h, arithmetic.h,
+# ...); angle includes never search the includer's directory, and SPM cannot add
+# a per-file -I, so the unity TU (which lives one level up in the family dir)
+# can't resolve them. A global -I per variant is unsafe: api.h differs per
+# variant (different CRYPTO_*BYTES) and generic basenames (arithmetic.h, mem.h)
+# would shadow other families. Quote includes resolve relative to the including
+# file's own dir, so each variant picks up its OWN headers with no collision.
+# The existence test leaves true externals (fips202.h, randombytes.h, aes.h,
+# std*.h, the avx2/neon-only m4_/shuffle_arithmetic.h) as angle includes.
+localize_includes() {
+    local family_dir="$1"; shift
+    local glob="$1"; shift
+    local vdir f hdr
+    for vdir in "$DEST/$family_dir"/$glob; do
+        [ -d "$vdir" ] || continue
+        for f in "$vdir"/*.c "$vdir"/*.h; do
+            [ -e "$f" ] || continue
+            for hdr in "$vdir"/*.h; do
+                [ -e "$hdr" ] || continue
+                hdr="$(basename "$hdr")"
+                # Escape dots for the regex; rewrite only the local-header angle form.
+                local esc="${hdr//./\\.}"
+                sed -i.bak -E "s|#include[[:space:]]*<${esc}>|#include \"${hdr}\"|g" "$f"
+                rm -f "$f.bak"
+            done
+        done
+    done
+    echo "  localized includes under $DEST/$family_dir/$glob"
+}
+
 generate_unity "src/sig/ml_dsa" "pqcrystals-dilithium-standard_ml-dsa-44_ref" "DILITHIUM_MODE 2"
 generate_unity "src/sig/ml_dsa" "pqcrystals-dilithium-standard_ml-dsa-65_ref" "DILITHIUM_MODE 3"
 generate_unity "src/sig/ml_dsa" "pqcrystals-dilithium-standard_ml-dsa-87_ref" "DILITHIUM_MODE 5"
@@ -123,6 +156,73 @@ generate_unity "src/sig/snova" "snova_SNOVA_37_17_2_opt"         "OPTIMISATION 1
 generate_unity "src/sig/snova" "snova_SNOVA_49_11_3_opt"         "OPTIMISATION 1" "v_SNOVA 49" "o_SNOVA 11" "l_SNOVA 3" "sk_is_seed 1" "PK_EXPAND_SHAKE 0"
 generate_unity "src/sig/snova" "snova_SNOVA_56_25_2_opt"         "OPTIMISATION 1" "v_SNOVA 56" "o_SNOVA 25" "l_SNOVA 2" "sk_is_seed 1" "PK_EXPAND_SHAKE 0"
 generate_unity "src/sig/snova" "snova_SNOVA_60_10_4_opt"         "OPTIMISATION 1" "v_SNOVA 60" "o_SNOVA 10" "l_SNOVA 4" "sk_is_seed 1" "PK_EXPAND_SHAKE 0"
+
+# MAYO opt variants select their parameter set from MAYO_VARIANT (CMake
+# -DMAYO_VARIANT=MAYO_N). Values mirror src/sig/mayo/CMakeLists.txt; MAYO-2 is
+# the only variant that omits HAVE_STACKEFFICIENT. MAYO angle-includes its own
+# variant-local headers, so localize_includes must run BEFORE generate_unity so
+# the merged unity TU can resolve them via quote includes.
+localize_includes "src/sig/mayo" "pqmayo_mayo-1_opt"
+localize_includes "src/sig/mayo" "pqmayo_mayo-2_opt"
+localize_includes "src/sig/mayo" "pqmayo_mayo-3_opt"
+localize_includes "src/sig/mayo" "pqmayo_mayo-5_opt"
+generate_unity "src/sig/mayo" "pqmayo_mayo-1_opt" "MAYO_VARIANT MAYO_1" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL" "HAVE_STACKEFFICIENT"
+generate_unity "src/sig/mayo" "pqmayo_mayo-2_opt" "MAYO_VARIANT MAYO_2" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL"
+generate_unity "src/sig/mayo" "pqmayo_mayo-3_opt" "MAYO_VARIANT MAYO_3" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL" "HAVE_STACKEFFICIENT"
+generate_unity "src/sig/mayo" "pqmayo_mayo-5_opt" "MAYO_VARIANT MAYO_5" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL" "HAVE_STACKEFFICIENT"
+
+# UOV (oil-and-vinegar) variants select their param triple (_OVk_v_o), public-
+# key/secret-key compression mode (_OV_CLASSIC / _OV_PKC / _OV_PKC_SKC), and
+# hash backend from CMake -D flags. We pin _UTILS_OQS_ so utils_hash.c uses
+# liboqs's bundled SHA3 (<oqs/sha3.h>) instead of OpenSSL, keeping the package
+# dependency-free. UOV quote-includes its own variant-local headers, so no
+# localize_includes is needed. Values mirror src/sig/uov/CMakeLists.txt.
+generate_unity "src/sig/uov" "pqov_ov_Is_ref"           "_OV16_160_64"  "_OV_CLASSIC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Ip_ref"           "_OV256_112_44" "_OV_CLASSIC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_III_ref"          "_OV256_184_72" "_OV_CLASSIC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_V_ref"            "_OV256_244_96" "_OV_CLASSIC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Is_pkc_ref"       "_OV16_160_64"  "_OV_PKC"      "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Ip_pkc_ref"       "_OV256_112_44" "_OV_PKC"      "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_III_pkc_ref"      "_OV256_184_72" "_OV_PKC"      "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_V_pkc_ref"        "_OV256_244_96" "_OV_PKC"      "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Is_pkc_skc_ref"   "_OV16_160_64"  "_OV_PKC_SKC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_Ip_pkc_skc_ref"   "_OV256_112_44" "_OV_PKC_SKC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_III_pkc_skc_ref"  "_OV256_184_72" "_OV_PKC_SKC"  "_UTILS_OQS_"
+generate_unity "src/sig/uov" "pqov_ov_V_pkc_skc_ref"    "_OV256_244_96" "_OV_PKC_SKC"  "_UTILS_OQS_"
+
+# BIKE keeps ALL sources in one additional_r4 dir, compiled three times with a
+# different LEVEL/FUNC_PREFIX (CMake -DLEVEL=N -DFUNC_PREFIX=OQS_KEM_bike_lN).
+# Emit one unity TU per level that bakes in those defines, force-includes
+# functions_renaming.h (which liboqs's CMake supplies via `-include`, not a
+# normal #include — it namespaces every symbol by FUNC_PREFIX, so it MUST be
+# included after FUNC_PREFIX is defined and before the sources), then includes
+# the portable .c set (avx2/avx512/pclmul/vpclmul + noop_main.c excluded). LEVEL
+# drives the parameter sizes in bike_defs.h. The glue kem_bike.c compiles once
+# (SPM, no -include) and references all three levels by full name — leave it.
+generate_bike_unity() {
+    local fam="src/kem/bike"
+    local files=(decode.c decode_portable.c error.c gf2x_inv.c gf2x_ksqr_portable.c gf2x_mul.c gf2x_mul_base_portable.c gf2x_mul_portable.c kem.c sampling.c sampling_portable.c shake_prf.c utilities.c)
+    local lvl f
+    for lvl in 1 3 5; do
+        local out="$DEST/$fam/unity_bike_l${lvl}.c"
+        {
+            echo "/* GENERATED by scripts/vendor-liboqs.sh — do not edit. */"
+            echo "#define LEVEL ${lvl}"
+            echo "#define FUNC_PREFIX OQS_KEM_bike_l${lvl}"
+            echo "#include \"functions_renaming.h\""
+            for f in "${files[@]}"; do
+                # utilities.c and gf2x_ksqr_portable.c both define BITS_IN_BYTE
+                # (8ULL vs (8)); equal values but concatenating them in one unity
+                # TU trips -Wmacro-redefined. Clear it before utilities.c.
+                if [ "$f" = "utilities.c" ]; then echo "#undef BITS_IN_BYTE"; fi
+                echo "#include \"additional_r4/${f}\""
+            done
+        } > "$out"
+        echo "  generated $out"
+    done
+}
+
+generate_bike_unity
 
 # Fetch upstream KAT hash manifests for cross-checking (best-effort, reference-only).
 # Kept OUTSIDE Tests/OQSTests/Vectors so the test bundle stays small.

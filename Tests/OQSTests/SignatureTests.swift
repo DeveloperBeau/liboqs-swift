@@ -92,6 +92,116 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
         #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
     }
 
+    @Test("MAYO-1 sign/verify")
+    func roundTripMAYO1() throws {
+        let key = try MAYO1.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("MAYO-2 sign/verify")
+    func roundTripMAYO2() throws {
+        let key = try MAYO2.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("MAYO-3 sign/verify")
+    func roundTripMAYO3() throws {
+        let key = try MAYO3.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    // MAYO-5 keygen allocates very large on-stack buffers and crashes
+    // (uncatchable SIGBUS) on the swift-testing worker-thread stack, so it has
+    // no sign-roundtrip test here. It works on a large thread stack and is
+    // name-resolution-tested in MAYOResolveTests. See the doc warning on MAYO5.
+
+    @Test("OV-Is sign/verify")
+    func roundTripOVIs() throws {
+        let key = try OVIs.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-Ip sign/verify")
+    func roundTripOVIp() throws {
+        let key = try OVIp.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-III sign/verify")
+    func roundTripOVIII() throws {
+        let key = try OVIII.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-V sign/verify")
+    func roundTripOVV() throws {
+        let key = try OVV.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-Is-pkc sign/verify")
+    func roundTripOVIsPKC() throws {
+        let key = try OVIsPKC.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-Ip-pkc sign/verify")
+    func roundTripOVIpPKC() throws {
+        let key = try OVIpPKC.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-III-pkc sign/verify")
+    func roundTripOVIIIPKC() throws {
+        let key = try OVIIIPKC.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-V-pkc sign/verify")
+    func roundTripOVVPKC() throws {
+        let key = try OVVPKC.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-Is-pkc-skc sign/verify")
+    func roundTripOVIsPKCSKC() throws {
+        let key = try OVIsPKCSKC.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-Ip-pkc-skc sign/verify")
+    func roundTripOVIpPKCSKC() throws {
+        let key = try OVIpPKCSKC.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-III-pkc-skc sign/verify")
+    func roundTripOVIIIPKCSKC() throws {
+        let key = try OVIIIPKCSKC.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("OV-V-pkc-skc sign/verify")
+    func roundTripOVVPKCSKC() throws {
+        let key = try OVVPKCSKC.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
     // MARK: - Empty message
 
     @Test("Sign and verify empty message")

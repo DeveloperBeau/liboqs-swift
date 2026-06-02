@@ -72,6 +72,16 @@ import Foundation
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "ML-DSA-44")))
     }
 
+    @Test("MAYO-1 KAT digest matches committed hash")
+    func mayo1KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let key = try MAYO1.PrivateKey()
+        let sig = try key.signature(for: Data("KAT".utf8))
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "MAYO-1")))
+    }
+
     @Test("SNOVA_24_5_4 KAT digest matches committed hash")
     func snova2454KAT() throws {
         KAT.seedDeterministicRNG()
@@ -80,5 +90,26 @@ import Foundation
         let sig = try key.signature(for: Data("KAT".utf8))
         let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "SNOVA_24_5_4")))
+    }
+
+    @Test("OV-Is KAT digest matches committed hash")
+    func ovIsKAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let key = try OVIs.PrivateKey()
+        let sig = try key.signature(for: Data("KAT".utf8))
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "OV-Is")))
+    }
+
+    @Test("BIKE-L1 KAT digest matches committed hash")
+    func bikeL1KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let sk = try BIKEL1.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "BIKE-L1")))
     }
 }

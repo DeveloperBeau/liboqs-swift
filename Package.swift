@@ -144,11 +144,62 @@ let cliboqsExclude: [String] = [
     "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-65_ref",
     "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-87_ref",
 
-    // UOV (requires OpenSSL, disabled)
-    "src/sig/uov",
+    // UOV: each _ref dir is compiled via its generated unity TU (which bakes in
+    // the param triple + backend + _UTILS_OQS_ defines); the raw variant dirs
+    // are excluded so SPM does not compile their .c as separate TUs, and the
+    // avx2/neon dirs are unused. The sig_uov_ov_*.c glue compiles normally.
+    "src/sig/uov/pqov_ov_Is_ref",
+    "src/sig/uov/pqov_ov_Is_avx2",
+    "src/sig/uov/pqov_ov_Is_neon",
+    "src/sig/uov/pqov_ov_Ip_ref",
+    "src/sig/uov/pqov_ov_Ip_avx2",
+    "src/sig/uov/pqov_ov_Ip_neon",
+    "src/sig/uov/pqov_ov_III_ref",
+    "src/sig/uov/pqov_ov_III_avx2",
+    "src/sig/uov/pqov_ov_III_neon",
+    "src/sig/uov/pqov_ov_V_ref",
+    "src/sig/uov/pqov_ov_V_avx2",
+    "src/sig/uov/pqov_ov_V_neon",
+    "src/sig/uov/pqov_ov_Is_pkc_ref",
+    "src/sig/uov/pqov_ov_Is_pkc_avx2",
+    "src/sig/uov/pqov_ov_Is_pkc_neon",
+    "src/sig/uov/pqov_ov_Ip_pkc_ref",
+    "src/sig/uov/pqov_ov_Ip_pkc_avx2",
+    "src/sig/uov/pqov_ov_Ip_pkc_neon",
+    "src/sig/uov/pqov_ov_III_pkc_ref",
+    "src/sig/uov/pqov_ov_III_pkc_avx2",
+    "src/sig/uov/pqov_ov_III_pkc_neon",
+    "src/sig/uov/pqov_ov_V_pkc_ref",
+    "src/sig/uov/pqov_ov_V_pkc_avx2",
+    "src/sig/uov/pqov_ov_V_pkc_neon",
+    "src/sig/uov/pqov_ov_Is_pkc_skc_ref",
+    "src/sig/uov/pqov_ov_Is_pkc_skc_avx2",
+    "src/sig/uov/pqov_ov_Is_pkc_skc_neon",
+    "src/sig/uov/pqov_ov_Ip_pkc_skc_ref",
+    "src/sig/uov/pqov_ov_Ip_pkc_skc_avx2",
+    "src/sig/uov/pqov_ov_Ip_pkc_skc_neon",
+    "src/sig/uov/pqov_ov_III_pkc_skc_ref",
+    "src/sig/uov/pqov_ov_III_pkc_skc_avx2",
+    "src/sig/uov/pqov_ov_III_pkc_skc_neon",
+    "src/sig/uov/pqov_ov_V_pkc_skc_ref",
+    "src/sig/uov/pqov_ov_V_pkc_skc_avx2",
+    "src/sig/uov/pqov_ov_V_pkc_skc_neon",
 
-    // MAYO (each variant needs different compile-time params, incompatible with SPM)
-    "src/sig/mayo",
+    // MAYO opt variants build via generated unity_*.c TUs; the raw opt dirs are
+    // excluded (their .c files are #included into the unity TU instead) and the
+    // avx2/neon dirs are unused.
+    "src/sig/mayo/pqmayo_mayo-1_opt",
+    "src/sig/mayo/pqmayo_mayo-2_opt",
+    "src/sig/mayo/pqmayo_mayo-3_opt",
+    "src/sig/mayo/pqmayo_mayo-5_opt",
+    "src/sig/mayo/pqmayo_mayo-1_avx2",
+    "src/sig/mayo/pqmayo_mayo-2_avx2",
+    "src/sig/mayo/pqmayo_mayo-3_avx2",
+    "src/sig/mayo/pqmayo_mayo-5_avx2",
+    "src/sig/mayo/pqmayo_mayo-1_neon",
+    "src/sig/mayo/pqmayo_mayo-2_neon",
+    "src/sig/mayo/pqmayo_mayo-3_neon",
+    "src/sig/mayo/pqmayo_mayo-5_neon",
 
     // CUDA/Icicle GPU
     "src/kem/ml_kem/cupqc_ml-kem-512_cuda",
@@ -158,8 +209,9 @@ let cliboqsExclude: [String] = [
     "src/kem/ml_kem/icicle_ml-kem-768_icicle_cuda",
     "src/kem/ml_kem/icicle_ml-kem-1024_icicle_cuda",
 
-    // BIKE disabled in oqsconfig.h (per-level compile defs)
-    "src/kem/bike",
+    // BIKE: raw sources compiled via per-level unity TUs (unity_bike_l*.c);
+    // exclude the raw dir so SPM does not compile its files separately.
+    "src/kem/bike/additional_r4",
 
     // FrodoKEM: files that are textually #included by other .c files
     "src/kem/frodokem/external/noise.c",

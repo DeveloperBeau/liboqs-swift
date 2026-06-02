@@ -6,8 +6,8 @@
 
 #include <stdalign.h>
 #include <stdint.h>
-#include <mem.h>
-#include <arithmetic.h>
+#include "mem.h"
+#include "arithmetic.h"
 
 #define MAYO_MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MAYO_MIN(x, y) (((x) < (y)) ? (x) : (y))

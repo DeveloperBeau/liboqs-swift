@@ -21,9 +21,13 @@
 
 // --- KEM algorithms (portable/reference only) ---
 
-// BIKE disabled: each level requires different compile-time LEVEL and
-// FUNC_PREFIX definitions, incompatible with SPM.
-// #define OQS_ENABLE_KEM_BIKE 1
+// BIKE: each level requires different compile-time LEVEL and FUNC_PREFIX
+// definitions; built via per-level unity translation units (see Package.swift
+// and scripts/vendor-liboqs.sh).
+#define OQS_ENABLE_KEM_BIKE 1
+#define OQS_ENABLE_KEM_bike_l1 1
+#define OQS_ENABLE_KEM_bike_l3 1
+#define OQS_ENABLE_KEM_bike_l5 1
 
 #define OQS_ENABLE_KEM_FRODOKEM 1
 #define OQS_ENABLE_KEM_frodokem_640_aes 1
@@ -104,9 +108,14 @@
 #define OQS_ENABLE_SIG_sphincs_shake_256f_simple 1
 #define OQS_ENABLE_SIG_sphincs_shake_256s_simple 1
 
-// MAYO disabled: each variant requires different compile-time parameters,
-// incompatible with SPM's single-flags-per-target model.
-// #define OQS_ENABLE_SIG_MAYO 1
+// MAYO enabled via generated per-variant unity translation units (see
+// scripts/vendor-liboqs.sh); each variant's compile-time parameters are baked
+// into its unity_*.c rather than passed as SPM per-target flags.
+#define OQS_ENABLE_SIG_MAYO 1
+#define OQS_ENABLE_SIG_mayo_1 1
+#define OQS_ENABLE_SIG_mayo_2 1
+#define OQS_ENABLE_SIG_mayo_3 1
+#define OQS_ENABLE_SIG_mayo_5 1
 
 #define OQS_ENABLE_SIG_CROSS 1
 #define OQS_ENABLE_SIG_cross_rsdp_128_balanced 1
@@ -128,8 +137,24 @@
 #define OQS_ENABLE_SIG_cross_rsdpg_256_fast 1
 #define OQS_ENABLE_SIG_cross_rsdpg_256_small 1
 
-// UOV disabled: requires OpenSSL
-// #define OQS_ENABLE_SIG_UOV 1
+// UOV enabled via generated unity TUs using the bundled liboqs SHA3 backend
+// (_UTILS_OQS_, <oqs/sha3.h>) rather than OpenSSL, so the package stays
+// dependency-free. Each variant's _ref dir is compiled through one unity TU
+// that bakes in its param triple + backend (_OV_CLASSIC/_OV_PKC/_OV_PKC_SKC)
+// + _UTILS_OQS_ alongside its sig_uov_ov_*.c glue.
+#define OQS_ENABLE_SIG_UOV 1
+#define OQS_ENABLE_SIG_uov_ov_Is 1
+#define OQS_ENABLE_SIG_uov_ov_Ip 1
+#define OQS_ENABLE_SIG_uov_ov_III 1
+#define OQS_ENABLE_SIG_uov_ov_V 1
+#define OQS_ENABLE_SIG_uov_ov_Is_pkc 1
+#define OQS_ENABLE_SIG_uov_ov_Ip_pkc 1
+#define OQS_ENABLE_SIG_uov_ov_III_pkc 1
+#define OQS_ENABLE_SIG_uov_ov_V_pkc 1
+#define OQS_ENABLE_SIG_uov_ov_Is_pkc_skc 1
+#define OQS_ENABLE_SIG_uov_ov_Ip_pkc_skc 1
+#define OQS_ENABLE_SIG_uov_ov_III_pkc_skc 1
+#define OQS_ENABLE_SIG_uov_ov_V_pkc_skc 1
 
 // SNOVA enabled via generated unity TUs (see Package.swift / vendor-liboqs.sh).
 // Each variant's _opt dir is compiled through one unity TU that bakes in its

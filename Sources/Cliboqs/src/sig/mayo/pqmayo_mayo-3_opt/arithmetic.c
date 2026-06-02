@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-#include <arithmetic.h>
-#include <simple_arithmetic.h>
-#include <mem.h>
-#include <echelon_form.h>
+#include "arithmetic.h"
+#include "simple_arithmetic.h"
+#include "mem.h"
+#include "echelon_form.h"
 #include <stdalign.h>
 #include <stdlib.h>
 #include <string.h>

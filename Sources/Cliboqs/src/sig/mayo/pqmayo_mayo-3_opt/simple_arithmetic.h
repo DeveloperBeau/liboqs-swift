@@ -2,7 +2,7 @@
 
 #ifndef SIMPLE_ARITHMETIC_H
 #define SIMPLE_ARITHMETIC_H
-#include <mem.h>
+#include "mem.h"
 
 // GF(16) multiplication mod x^4 + x + 1
 static inline unsigned char mul_f(unsigned char a, unsigned char b) {

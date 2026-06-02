@@ -68,6 +68,15 @@ import Foundation
     @Test("sntrup761 keygen")
     func sntrup761() throws { _ = try SNTRUP761.PrivateKey() }
 
+    // MARK: - KEM key generation: BIKE
+
+    @Test("BIKE-L1 keygen")
+    func bikeL1() throws { _ = try BIKEL1.PrivateKey() }
+    @Test("BIKE-L3 keygen")
+    func bikeL3() throws { _ = try BIKEL3.PrivateKey() }
+    @Test("BIKE-L5 keygen")
+    func bikeL5() throws { _ = try BIKEL5.PrivateKey() }
+
     // MARK: - Signature key generation: Falcon
 
     @Test("Falcon-512 keygen")
@@ -251,6 +260,49 @@ import Foundation
     func snova2965() throws { _ = try SNOVA29_6_5.PrivateKey() }
     @Test("SNOVA_37_17_2 keygen")
     func snova37172() throws { _ = try SNOVA37_17_2.PrivateKey() }
+
+    // MARK: - Signature key generation: MAYO
+
+    // MAYO-5's largest parameter set allocates very large on-stack buffers and
+    // crashes (uncatchable SIGBUS) on the default swift-testing worker-thread
+    // stack during key generation. It is verified to work on a large stack
+    // (32 MB) but is excluded here and from sign-roundtrip tests; the type
+    // compiles and is name-resolution-tested in MAYOResolveTests, and carries a
+    // doc warning about the large-thread-stack requirement.
+
+    @Test("MAYO-1 keygen")
+    func mayo1() throws { _ = try MAYO1.PrivateKey() }
+    @Test("MAYO-2 keygen")
+    func mayo2() throws { _ = try MAYO2.PrivateKey() }
+    @Test("MAYO-3 keygen")
+    func mayo3() throws { _ = try MAYO3.PrivateKey() }
+
+    // MARK: - Signature key generation: UOV
+
+    @Test("OV-Is keygen")
+    func ovIs() throws { _ = try OVIs.PrivateKey() }
+    @Test("OV-Ip keygen")
+    func ovIp() throws { _ = try OVIp.PrivateKey() }
+    @Test("OV-III keygen")
+    func ovIII() throws { _ = try OVIII.PrivateKey() }
+    @Test("OV-V keygen")
+    func ovV() throws { _ = try OVV.PrivateKey() }
+    @Test("OV-Is-pkc keygen")
+    func ovIsPKC() throws { _ = try OVIsPKC.PrivateKey() }
+    @Test("OV-Ip-pkc keygen")
+    func ovIpPKC() throws { _ = try OVIpPKC.PrivateKey() }
+    @Test("OV-III-pkc keygen")
+    func ovIIIPKC() throws { _ = try OVIIIPKC.PrivateKey() }
+    @Test("OV-V-pkc keygen")
+    func ovVPKC() throws { _ = try OVVPKC.PrivateKey() }
+    @Test("OV-Is-pkc-skc keygen")
+    func ovIsPKCSKC() throws { _ = try OVIsPKCSKC.PrivateKey() }
+    @Test("OV-Ip-pkc-skc keygen")
+    func ovIpPKCSKC() throws { _ = try OVIpPKCSKC.PrivateKey() }
+    @Test("OV-III-pkc-skc keygen")
+    func ovIIIPKCSKC() throws { _ = try OVIIIPKCSKC.PrivateKey() }
+    @Test("OV-V-pkc-skc keygen")
+    func ovVPKCSKC() throws { _ = try OVVPKCSKC.PrivateKey() }
 
     // MARK: - KEM key generation: Kyber (deprecated)
 
