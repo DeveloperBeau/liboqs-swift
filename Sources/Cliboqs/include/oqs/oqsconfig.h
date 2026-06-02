@@ -332,6 +332,93 @@
 #define OQS_ENABLE_SIG_slh_dsa_shake_256_prehash_shake_256s 1
 #define OQS_ENABLE_SIG_slh_dsa_shake_256_prehash_shake_256f 1
 
-// Stateful signatures disabled (require stateful key management)
+// Stateful hash-based signatures (XMSS/XMSSMT/LMS).
+//
+// Key/signature generation is gated behind the OQS_ALLOW_* macros below. These
+// MUST live in this header (not just Package.swift cSettings): sig_stfl.h gates
+// the ENTIRE OQS_SIG_STFL struct definition on OQS_ALLOW_STFL_KEY_AND_SIG_GEN
+// (#ifndef → bare `struct OQS_SIG` alias; #else → the real struct with the
+// length_* fields). A C-target -D flag is NOT seen by the Swift clang importer,
+// so defining it only in cSettings makes the importer parse the stub struct
+// while the C is compiled against the real one — an ABI/layout mismatch that
+// makes sig.pointee.length_public_key read garbage and overflows caller buffers.
+// Putting them here makes every translation unit (C and the importer) agree.
+// Verify is always available regardless.
+#define OQS_ALLOW_STFL_KEY_AND_SIG_GEN 1
+#define OQS_ALLOW_XMSS_KEY_AND_SIG_GEN 1
+#define OQS_ALLOW_LMS_KEY_AND_SIG_GEN 1
+#define OQS_ENABLE_SIG_STFL 1
+#define OQS_ENABLE_SIG_STFL_XMSS 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha256_h10 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha256_h10_192 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha256_h16 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha256_h16_192 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha256_h20 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha256_h20_192 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha512_h10 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha512_h16 1
+#define OQS_ENABLE_SIG_STFL_xmss_sha512_h20 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake128_h10 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake128_h16 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake128_h20 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h10 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h10_192 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h10_256 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h16 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h16_192 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h16_256 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h20 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h20_192 1
+#define OQS_ENABLE_SIG_STFL_xmss_shake256_h20_256 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_sha256_h20_2 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_sha256_h20_4 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_sha256_h40_2 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_sha256_h40_4 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_sha256_h40_8 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_sha256_h60_12 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_sha256_h60_3 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_sha256_h60_6 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_shake128_h20_2 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_shake128_h20_4 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_shake128_h40_2 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_shake128_h40_4 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_shake128_h40_8 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_shake128_h60_12 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_shake128_h60_3 1
+#define OQS_ENABLE_SIG_STFL_xmssmt_shake128_h60_6 1
+#define OQS_ENABLE_SIG_STFL_LMS 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w1 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w2 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w2_h10_w2 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w4 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w4_h10_w4 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w4_h5_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w8_h10_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h10_w8_h5_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h15_w1 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h15_w2 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h15_w4 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h15_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h15_w8_h10_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h15_w8_h15_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h15_w8_h5_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h20_w1 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h20_w2 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h20_w4 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h20_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h20_w8_h10_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h20_w8_h15_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h20_w8_h20_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h20_w8_h5_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h25_w1 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h25_w2 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h25_w4 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h25_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h5_w1 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h5_w2 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h5_w4 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h5_w8 1
+#define OQS_ENABLE_SIG_STFL_lms_sha256_h5_w8_h5_w8 1
 
 #endif // OQS_OQSCONFIG_H

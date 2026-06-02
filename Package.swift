@@ -247,8 +247,65 @@ let cliboqsExclude: [String] = [
     // Libjade
     "src/common/libjade_shims",
 
-    // Stateful signatures (disabled)
-    "src/sig_stfl",
+    // Stateful signatures (XMSS/XMSSMT/LMS).
+    //
+    // XMSS/XMSSMT: each variant is compiled via a generated per-variant unity TU
+    // (unity_sig_stfl_xmss_*.c / unity_sig_stfl_xmssmt_*.c) that bakes in the
+    // variant's XMSS_PARAMS_NAMESPACE + HASH (extracted from upstream CMake) and
+    // #includes its variant file, sig_stfl_xmss[mt]_functions.c, and the shared
+    // external/ sources. The shared external sources, the namespaced functions.c
+    // files, and the macro-only sig_stfl_xmss_xmssmt.c are excluded here so SPM
+    // does not compile them as separate TUs (they have no fixed namespace on
+    // their own). sig_stfl_xmss_secret_key_functions.c is NOT namespaced and
+    // compiles once normally; the top-level glue (sig_stfl.c) compiles normally.
+    "src/sig_stfl/xmss/external",
+    "src/sig_stfl/xmss/sig_stfl_xmss_functions.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_functions.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_xmssmt.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha256_h10_192.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha256_h16_192.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha256_h16.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha256_h20_192.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha256_h20.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha512_h10.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha512_h16.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha512_h20.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake128_h10.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake128_h16.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake128_h20.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h10_192.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h10_256.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h10.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h16_192.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h16_256.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h16.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h20_192.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h20_256.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_shake256_h20.c",
+    "src/sig_stfl/xmss/sig_stfl_xmss_sha256_h10.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_sha256_h20_2.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_sha256_h20_4.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_sha256_h40_2.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_sha256_h40_4.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_sha256_h40_8.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_sha256_h60_12.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_sha256_h60_3.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_sha256_h60_6.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_shake128_h20_2.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_shake128_h20_4.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_shake128_h40_2.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_shake128_h40_4.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_shake128_h40_8.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_shake128_h60_12.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_shake128_h60_3.c",
+    "src/sig_stfl/xmss/sig_stfl_xmssmt_shake128_h60_6.c",
+
+    // LMS: 33 variants are runtime-selected from one object set (no per-variant
+    // compile flags), so the whole lms/ dir compiles normally. Only exclude
+    // hss_thread_pthread.c — it is the pthread thread backend NOT in upstream's
+    // CMake SRCS (which uses hss_thread_single.c); compiling both would define
+    // duplicate hss_thread_* symbols.
+    "src/sig_stfl/lms/external/hss_thread_pthread.c",
 ]
 
 let package = Package(
@@ -275,6 +332,13 @@ let package = Package(
                 .define("OQS_DIST_BUILD", to: "1"),
                 .define("OQS_HAVE_POSIX_MEMALIGN", to: "1", .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .linux, .android])),
                 .define("SNOVA_LIBOQS", to: "1"),
+                // NOTE: the stateful-signature opt-in macros
+                // (OQS_ALLOW_{STFL,XMSS,LMS}_KEY_AND_SIG_GEN) are defined in
+                // oqsconfig.h, NOT here — sig_stfl.h gates the OQS_SIG_STFL struct
+                // layout on OQS_ALLOW_STFL_KEY_AND_SIG_GEN, so the macro must be
+                // visible to the Swift clang importer (which does not see C-target
+                // -D flags), otherwise the importer parses a stub struct and reads
+                // length_* fields at the wrong offsets.
                 // pqclean_shims must come first so its sha2.h/sha3.h shims
                 // are found before the internal common/sha2/sha2.h etc.
                 .headerSearchPath("src/common/pqclean_shims"),
