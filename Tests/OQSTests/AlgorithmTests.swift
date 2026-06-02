@@ -27,8 +27,46 @@ import Foundation
     @Test("Classic McEliece 348864 keygen")
     func classicMcEliece348864() throws { _ = try ClassicMcEliece348864.PrivateKey() }
 
-    // Classic McEliece 460896+ variants require too much memory for CI keygen.
-    // Their types compile and share the same internal path as 348864.
+    @Test("Classic McEliece 348864f keygen")
+    func classicMcEliece348864f() throws { _ = try ClassicMcEliece348864f.PrivateKey() }
+
+    // Classic McEliece 460896+ variants (including the f-variants) require too much
+    // memory for CI keygen. Their types compile and share the same internal path as 348864.
+
+    // MARK: - KEM key generation: FrodoKEM
+
+    @Test("FrodoKEM-640-AES keygen")
+    func frodo640AES() throws { _ = try FrodoKEM640AES.PrivateKey() }
+    @Test("FrodoKEM-640-SHAKE keygen")
+    func frodo640SHAKE() throws { _ = try FrodoKEM640SHAKE.PrivateKey() }
+    @Test("FrodoKEM-976-AES keygen")
+    func frodo976AES() throws { _ = try FrodoKEM976AES.PrivateKey() }
+    @Test("FrodoKEM-976-SHAKE keygen")
+    func frodo976SHAKE() throws { _ = try FrodoKEM976SHAKE.PrivateKey() }
+    @Test("FrodoKEM-1344-AES keygen")
+    func frodo1344AES() throws { _ = try FrodoKEM1344AES.PrivateKey() }
+    @Test("FrodoKEM-1344-SHAKE keygen")
+    func frodo1344SHAKE() throws { _ = try FrodoKEM1344SHAKE.PrivateKey() }
+
+    // MARK: - KEM key generation: NTRU
+
+    @Test("NTRU-HPS-2048-509 keygen")
+    func ntruHPS2048509() throws { _ = try NTRUHPS2048509.PrivateKey() }
+    @Test("NTRU-HPS-2048-677 keygen")
+    func ntruHPS2048677() throws { _ = try NTRUHPS2048677.PrivateKey() }
+    @Test("NTRU-HPS-4096-821 keygen")
+    func ntruHPS4096821() throws { _ = try NTRUHPS4096821.PrivateKey() }
+    @Test("NTRU-HPS-4096-1229 keygen")
+    func ntruHPS40961229() throws { _ = try NTRUHPS40961229.PrivateKey() }
+    @Test("NTRU-HRSS-701 keygen")
+    func ntruHRSS701() throws { _ = try NTRUHRSS701.PrivateKey() }
+    @Test("NTRU-HRSS-1373 keygen")
+    func ntruHRSS1373() throws { _ = try NTRUHRSS1373.PrivateKey() }
+
+    // MARK: - KEM key generation: NTRU Prime
+
+    @Test("sntrup761 keygen")
+    func sntrup761() throws { _ = try SNTRUP761.PrivateKey() }
 
     // MARK: - Signature key generation: Falcon
 
@@ -175,6 +213,56 @@ import Foundation
 
     @Test("SLH-DSA-Pure-SHAKE-256f keygen")
     func slhDSAPureSHAKE256f() throws { _ = try SLHDSAPureSHAKE256f.PrivateKey() }
+
+    // MARK: - Signature key generation: ML-DSA
+
+    @Test("ML-DSA-44 keygen")
+    func mldsa44() throws { _ = try MLDSA44.PrivateKey() }
+    @Test("ML-DSA-65 keygen")
+    func mldsa65() throws { _ = try MLDSA65.PrivateKey() }
+    @Test("ML-DSA-87 keygen")
+    func mldsa87() throws { _ = try MLDSA87.PrivateKey() }
+
+    // MARK: - Signature key generation: SNOVA
+
+    // SNOVA's larger parameter sets allocate very large on-stack buffers and
+    // crash (uncatchable SIGBUS) on the default swift-testing worker-thread stack:
+    //   - keygen crashers (4), excluded from CI keygen tests below:
+    //     SNOVA_37_8_4, SNOVA_49_11_3, SNOVA_56_25_2, SNOVA_60_10_4.
+    //   - sign-only crashers (2), keygen-tested below but NOT sign-roundtrip-tested:
+    //     SNOVA_24_5_5, SNOVA_29_6_5 (rank-5; keygen fits the stack, signing does not).
+    // All 12 types compile and are name-resolution-tested in SNOVAResolveTests; the
+    // 6 crash-prone variants carry a doc warning about the large-thread-stack
+    // requirement (keygen-specific for the four, sign-specific for the two).
+
+    @Test("SNOVA_24_5_4 keygen")
+    func snova2454() throws { _ = try SNOVA24_5_4.PrivateKey() }
+    @Test("SNOVA_24_5_4_SHAKE keygen")
+    func snova2454SHAKE() throws { _ = try SNOVA24_5_4_SHAKE.PrivateKey() }
+    @Test("SNOVA_24_5_4_esk keygen")
+    func snova2454esk() throws { _ = try SNOVA24_5_4_esk.PrivateKey() }
+    @Test("SNOVA_24_5_4_SHAKE_esk keygen")
+    func snova2454SHAKEesk() throws { _ = try SNOVA24_5_4_SHAKE_esk.PrivateKey() }
+    @Test("SNOVA_24_5_5 keygen")
+    func snova2455() throws { _ = try SNOVA24_5_5.PrivateKey() }
+    @Test("SNOVA_25_8_3 keygen")
+    func snova2583() throws { _ = try SNOVA25_8_3.PrivateKey() }
+    @Test("SNOVA_29_6_5 keygen")
+    func snova2965() throws { _ = try SNOVA29_6_5.PrivateKey() }
+    @Test("SNOVA_37_17_2 keygen")
+    func snova37172() throws { _ = try SNOVA37_17_2.PrivateKey() }
+
+    // MARK: - KEM key generation: Kyber (deprecated)
+
+    @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")
+    @Test("Kyber512 keygen")
+    func kyber512() throws { _ = try Kyber512.PrivateKey() }
+    @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")
+    @Test("Kyber768 keygen")
+    func kyber768() throws { _ = try Kyber768.PrivateKey() }
+    @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")
+    @Test("Kyber1024 keygen")
+    func kyber1024() throws { _ = try Kyber1024.PrivateKey() }
 
     // MARK: - Error descriptions
 

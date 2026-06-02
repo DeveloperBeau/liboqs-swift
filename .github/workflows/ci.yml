@@ -27,8 +27,10 @@ jobs:
       - uses: DeveloperBeau/setup-swift@v1
       - name: Build
         run: swift build -v
-      - name: Test
-        run: swift test -v
+      - name: Test (parallel bulk, excludes KAT)
+        run: swift test -v --skip KATTests
+      - name: Test (deterministic KAT, serial)
+        run: swift test -v --no-parallel --filter KATTests
 
   android:
     name: Android
@@ -40,3 +42,9 @@ jobs:
           swift-version: '6.3'
           run-tests: true
           free-disk-space: true
+          # Skip KATTests on Android: they seed liboqs's process-global NIST-KAT
+          # DRBG and must run serially (the build job runs them via
+          # `--no-parallel --filter KATTests`). This action runs `swift test` in
+          # parallel, which would race the global RNG and flake. KAT determinism
+          # is validated on the macOS/Linux build job.
+          swift-test-flags: '--skip KATTests'

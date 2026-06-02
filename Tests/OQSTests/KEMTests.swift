@@ -62,6 +62,145 @@ import Foundation
         #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
     }
 
+    @Test("Classic McEliece 348864f round-trip")
+    func roundTripMcEliece348864f() throws {
+        let sk = try ClassicMcEliece348864f.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-640-AES round-trip")
+    func roundTripFrodo640AES() throws {
+        let sk = try FrodoKEM640AES.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-640-SHAKE round-trip")
+    func roundTripFrodo640SHAKE() throws {
+        let sk = try FrodoKEM640SHAKE.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-976-AES round-trip")
+    func roundTripFrodo976AES() throws {
+        let sk = try FrodoKEM976AES.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-976-SHAKE round-trip")
+    func roundTripFrodo976SHAKE() throws {
+        let sk = try FrodoKEM976SHAKE.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-1344-AES round-trip")
+    func roundTripFrodo1344AES() throws {
+        let sk = try FrodoKEM1344AES.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("FrodoKEM-1344-SHAKE round-trip")
+    func roundTripFrodo1344SHAKE() throws {
+        let sk = try FrodoKEM1344SHAKE.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HPS-2048-509 round-trip")
+    func roundTripNTRUHPS2048509() throws {
+        let sk = try NTRUHPS2048509.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HPS-2048-677 round-trip")
+    func roundTripNTRUHPS2048677() throws {
+        let sk = try NTRUHPS2048677.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HPS-4096-821 round-trip")
+    func roundTripNTRUHPS4096821() throws {
+        let sk = try NTRUHPS4096821.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HPS-4096-1229 round-trip")
+    func roundTripNTRUHPS40961229() throws {
+        let sk = try NTRUHPS40961229.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HRSS-701 round-trip")
+    func roundTripNTRUHRSS701() throws {
+        let sk = try NTRUHRSS701.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("NTRU-HRSS-1373 round-trip")
+    func roundTripNTRUHRSS1373() throws {
+        let sk = try NTRUHRSS1373.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @Test("sntrup761 round-trip")
+    func roundTripSNTRUP761() throws {
+        let sk = try SNTRUP761.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @available(*, deprecated, message: "Exercises deprecated Kyber512 on purpose")
+    @Test("Kyber512 round-trip")
+    func roundTripKyber512() throws {
+        let sk = try Kyber512.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @available(*, deprecated, message: "Exercises deprecated Kyber768 on purpose")
+    @Test("Kyber768 round-trip")
+    func roundTripKyber768() throws {
+        let sk = try Kyber768.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
+    @available(*, deprecated, message: "Exercises deprecated Kyber1024 on purpose")
+    @Test("Kyber1024 round-trip")
+    func roundTripKyber1024() throws {
+        let sk = try Kyber1024.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
     // MARK: - Key pair uniqueness
 
     @Test("Key pairs are unique")
@@ -212,6 +351,17 @@ import Foundation
         let extended = sealed.ciphertext + Data([0x00])
         #expect(throws: OQSError.self) {
             try privateKey.decryptSharedSecret(extended)
+        }
+    }
+
+    @Test("FrodoKEM-640-AES rejects wrong-size key import")
+    func frodo640AESInvalidSize() {
+        #expect(throws: OQSError.self) {
+            try FrodoKEM640AES.PrivateKey(rawRepresentation: Data([0x00]),
+                                          publicKeyRepresentation: Data([0x00]))
+        }
+        #expect(throws: OQSError.self) {
+            _ = try FrodoKEM640AES.PublicKey(rawRepresentation: Data([0x00]))
         }
     }
 }

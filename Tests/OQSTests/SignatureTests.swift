@@ -64,6 +64,34 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
         #expect(valid)
     }
 
+    @Test("ML-DSA-44 sign/verify")
+    func roundTripMLDSA44() throws {
+        let key = try MLDSA44.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("ML-DSA-65 sign/verify")
+    func roundTripMLDSA65() throws {
+        let key = try MLDSA65.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("ML-DSA-87 sign/verify")
+    func roundTripMLDSA87() throws {
+        let key = try MLDSA87.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("SNOVA_24_5_4 sign/verify")
+    func roundTripSNOVA2454() throws {
+        let key = try SNOVA24_5_4.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
     // MARK: - Empty message
 
     @Test("Sign and verify empty message")
@@ -196,5 +224,47 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
         // Both should still verify
         #expect(try signingKey.publicKey.isValidSignature(sig1, for: testMessage))
         #expect(try signingKey.publicKey.isValidSignature(sig2, for: testMessage))
+    }
+
+    // MARK: - SLH-DSA prehash
+
+    @Test("SLH-DSA prehash SHA2-224 / SHA2-128f round-trip")
+    func roundTripSLHDSAPrehash() throws {
+        let key = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_224, paramSet: .sha2_128f)
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("SLH-DSA prehash fast param sets keygen")
+    func prehashFastKeygen() throws {
+        let fast: [SLHDSA.Prehash.ParamSet] = [.sha2_128f, .sha2_192f, .sha2_256f,
+                                               .shake_128f, .shake_192f, .shake_256f]
+        for ps in fast {
+            _ = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_256, paramSet: ps)
+        }
+    }
+
+    @Test("SLH-DSA prehash key import round-trip")
+    func prehashKeyImport() throws {
+        let key = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_256, paramSet: .sha2_128f)
+        let imported = try SLHDSA.Prehash.PrivateKey(
+            prehash: .sha2_256, paramSet: .sha2_128f,
+            rawRepresentation: key.rawRepresentation,
+            publicKeyRepresentation: key.publicKey.rawRepresentation
+        )
+        #expect(imported.rawRepresentation == key.rawRepresentation)
+        let sig = try imported.signature(for: testMessage)
+        #expect(try imported.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("SLH-DSA prehash key import rejects wrong size")
+    func prehashKeyImportInvalidSize() {
+        #expect(throws: OQSError.self) {
+            try SLHDSA.Prehash.PrivateKey(
+                prehash: .sha2_256, paramSet: .sha2_128f,
+                rawRepresentation: Data([0x00]),
+                publicKeyRepresentation: Data([0x00])
+            )
+        }
     }
 }
