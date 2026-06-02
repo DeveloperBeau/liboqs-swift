@@ -121,11 +121,28 @@ let cliboqsExclude: [String] = [
     "src/sig/snova/snova_SNOVA_49_11_3_neon",
     "src/sig/snova/snova_SNOVA_56_25_2_neon",
     "src/sig/snova/snova_SNOVA_60_10_4_neon",
-    // SNOVA disabled in oqsconfig.h (duplicate filenames)
-    "src/sig/snova",
+    // SNOVA: each _opt dir is compiled via its generated unity TU; the
+    // sig_snova_SNOVA_*.c glue compiles normally.
+    "src/sig/snova/snova_SNOVA_24_5_4_opt",
+    "src/sig/snova/snova_SNOVA_24_5_4_SHAKE_opt",
+    "src/sig/snova/snova_SNOVA_24_5_4_esk_opt",
+    "src/sig/snova/snova_SNOVA_24_5_4_SHAKE_esk_opt",
+    "src/sig/snova/snova_SNOVA_24_5_5_opt",
+    "src/sig/snova/snova_SNOVA_25_8_3_opt",
+    "src/sig/snova/snova_SNOVA_29_6_5_opt",
+    "src/sig/snova/snova_SNOVA_37_8_4_opt",
+    "src/sig/snova/snova_SNOVA_37_17_2_opt",
+    "src/sig/snova/snova_SNOVA_49_11_3_opt",
+    "src/sig/snova/snova_SNOVA_56_25_2_opt",
+    "src/sig/snova/snova_SNOVA_60_10_4_opt",
 
-    // ML-DSA disabled in oqsconfig.h (duplicate filenames)
-    "src/sig/ml_dsa",
+    // ML-DSA: each _ref dir is compiled via its generated unity TU. Excluding
+    // a dir stops SPM compiling its .c as separate TUs; the files stay on disk
+    // so the unity #include reaches them. The sig_ml_dsa_*.c glue compiles
+    // normally (sig.c references each variant's _new() under #ifdef).
+    "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-44_ref",
+    "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-65_ref",
+    "src/sig/ml_dsa/pqcrystals-dilithium-standard_ml-dsa-87_ref",
 
     // UOV (requires OpenSSL, disabled)
     "src/sig/uov",
@@ -163,8 +180,17 @@ let cliboqsExclude: [String] = [
     "src/kem/frodokem/external/frodo1344aes_avx2.c",
     "src/kem/frodokem/external/frodo1344shake_avx2.c",
 
-    // Kyber disabled in oqsconfig.h (deprecated, duplicate filenames)
-    "src/kem/kyber",
+    // Kyber: each _ref dir is compiled via its generated unity TU; the
+    // kem_kyber_*.c glue compiles normally. Non-portable variants (libjade,
+    // oldpqclean aarch64, avx2) are excluded. (avx2 + oldpqclean aarch64 dirs
+    // are also listed in the SIMD/AArch64 blocks above.)
+    "src/kem/kyber/pqcrystals-kyber_kyber512_ref",
+    "src/kem/kyber/pqcrystals-kyber_kyber768_ref",
+    "src/kem/kyber/pqcrystals-kyber_kyber1024_ref",
+    "src/kem/kyber/libjade_kyber512_ref",
+    "src/kem/kyber/libjade_kyber768_ref",
+    "src/kem/kyber/libjade_kyber512_avx2",
+    "src/kem/kyber/libjade_kyber768_avx2",
 
     // Libjade
     "src/common/libjade_shims",

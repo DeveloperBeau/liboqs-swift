@@ -61,4 +61,24 @@ import Foundation
             + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "sntrup761")))
     }
+
+    @Test("ML-DSA-44 KAT digest matches committed hash")
+    func mldsa44KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let key = try MLDSA44.PrivateKey()
+        let sig = try key.signature(for: Data("KAT".utf8))
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "ML-DSA-44")))
+    }
+
+    @Test("SNOVA_24_5_4 KAT digest matches committed hash")
+    func snova2454KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let key = try SNOVA24_5_4.PrivateKey()
+        let sig = try key.signature(for: Data("KAT".utf8))
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "SNOVA_24_5_4")))
+    }
 }
