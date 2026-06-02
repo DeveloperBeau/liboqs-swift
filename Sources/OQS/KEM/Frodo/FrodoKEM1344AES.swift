@@ -2,6 +2,37 @@ import Foundation
 internal import Cliboqs
 
 /// FrodoKEM-1344-AES key encapsulation (NIST Round 3 alternate, ~256-bit security, AES-based PRF).
+///
+/// Conservative LWE-based KEM at NIST level 5 (~256-bit security). FrodoKEM trades
+/// larger keys and ciphertexts than ML-KEM for more conservative security assumptions,
+/// relying on plain (unstructured) learning-with-errors. This variant uses AES-128 to
+/// generate the public matrix A, which is fast on CPUs with AES-NI hardware support.
+///
+/// ```swift
+/// // Alice generates a key pair
+/// let alice = try FrodoKEM1344AES.PrivateKey()
+///
+/// // Bob gets Alice's public key and creates a shared secret
+/// let pub = try FrodoKEM1344AES.PublicKey(rawRepresentation: alicePublicKeyData)
+/// let result = try pub.generateSharedSecret()
+/// // Bob has result.sharedSecret. Send result.ciphertext to Alice
+///
+/// // Alice decrypts it
+/// let secret = try alice.decryptSharedSecret(result.ciphertext)
+/// // secret == result.sharedSecret
+///
+/// // Use the 32-byte secret as an AES or ChaCha20 key
+/// let key = SymmetricKey(data: secret.rawRepresentation)
+/// ```
+///
+/// Keys can be saved and loaded:
+/// ```swift
+/// let saved = alice.rawRepresentation
+/// let loaded = try FrodoKEM1344AES.PrivateKey(
+///     rawRepresentation: saved,
+///     publicKeyRepresentation: alice.publicKey.rawRepresentation
+/// )
+/// ```
 public enum FrodoKEM1344AES: Sendable {
     static let algorithmName = "FrodoKEM-1344-AES"
 
