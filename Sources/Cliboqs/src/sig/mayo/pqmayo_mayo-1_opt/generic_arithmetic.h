@@ -3,12 +3,12 @@
 #ifndef GENERIC_ARITHMETIC_H
 #define GENERIC_ARITHMETIC_H
 
-#include "simple_arithmetic.h"
+#include <simple_arithmetic.h>
 
 #ifdef ENABLE_PARAMS_DYNAMIC
-#include "arithmetic_dynamic.h"
+#include <arithmetic_dynamic.h>
 #else
-#include "arithmetic_fixed.h"
+#include <arithmetic_fixed.h>
 #endif
 
 // multiplies m (possibly upper triangular) matrices with a single matrix and adds result to acc

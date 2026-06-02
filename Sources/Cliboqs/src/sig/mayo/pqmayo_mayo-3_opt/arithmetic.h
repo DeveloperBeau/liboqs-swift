@@ -5,7 +5,7 @@
 #define ARITHMETIC_H
 
 #include <stdint.h>
-#include "mayo.h"
+#include <mayo.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -87,7 +87,7 @@ static inline unsigned char ct_compare_8(unsigned char a, unsigned char b) {
 #elif defined(MAYO_M4)
     #include <m4_arithmetic.h>
 #else
-    #include "generic_arithmetic.h"
+    #include <generic_arithmetic.h>
 #endif
 
 static

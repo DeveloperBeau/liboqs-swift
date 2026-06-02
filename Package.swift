@@ -185,9 +185,11 @@ let cliboqsExclude: [String] = [
     "src/sig/uov/pqov_ov_V_pkc_skc_avx2",
     "src/sig/uov/pqov_ov_V_pkc_skc_neon",
 
-    // MAYO opt variants build via generated unity_*.c TUs; the raw opt dirs are
-    // excluded (their .c files are #included into the unity TU instead) and the
-    // avx2/neon dirs are unused.
+    // MAYO opt variants build as their own SPM sub-targets (CliboqsMAYO{1,2,3,5})
+    // so each variant's angle-included variant-local headers (mayo.h, api.h,
+    // params.h, ...) resolve against its OWN directory. Excluded here so the main
+    // Cliboqs target does not also compile them (SPM requires a dir be owned by
+    // exactly one target); the avx2/neon dirs are unused.
     "src/sig/mayo/pqmayo_mayo-1_opt",
     "src/sig/mayo/pqmayo_mayo-2_opt",
     "src/sig/mayo/pqmayo_mayo-3_opt",
@@ -251,6 +253,48 @@ let cliboqsExclude: [String] = [
     "src/sig_stfl",
 ]
 
+// Each MAYO opt variant is compiled as its own C target so that the variant's
+// angle-included, variant-local headers (mayo.h, api.h, params.h, ...) resolve
+// against its OWN directory (".") instead of colliding on a shared flat include
+// path — different variants ship api.h/params.h with different parameter sizes.
+// The per-variant -D parameter set + header search path mirror what liboqs's
+// CMake supplies, re-rooted relative to the variant dir. This keeps the upstream
+// MAYO sources byte-pristine (no include rewriting). MAYO-2 is the only variant
+// that omits HAVE_STACKEFFICIENT. Paths: from pqmayo_mayo-N_opt, ../../.. = src,
+// ../../../.. = Sources/Cliboqs, ../../../../include = Sources/Cliboqs/include.
+func mayoTarget(name: String, variantDir: String, variantMacro: String, stackEfficient: Bool) -> Target {
+    var defines: [CSetting] = [
+        .define("MAYO_VARIANT", to: variantMacro),
+        .define("MAYO_BUILD_TYPE_OPT"),
+        .define("HAVE_RANDOMBYTES_NORETVAL"),
+    ]
+    if stackEfficient {
+        defines.append(.define("HAVE_STACKEFFICIENT"))
+    }
+    return .target(
+        name: name,
+        path: "Sources/Cliboqs/src/sig/mayo/\(variantDir)",
+        // The glue (sig_mayo_*.c) calls into each variant via `extern` decls, not
+        // via these headers, so nothing imports these as Clang modules. "." is
+        // only here to satisfy SPM's C-target requirement; it cannot be an empty
+        // subdir (would break the pristine diff) or a path outside the target.
+        publicHeadersPath: ".",
+        cSettings: defines + [
+            // pqclean_shims first (its aes.h/fips202.h/randombytes.h shims must
+            // win over the internal common ones), then "." so this variant's own
+            // mayo.h/api.h/params.h resolve before anything else.
+            .headerSearchPath("../../../common/pqclean_shims"),
+            .headerSearchPath("."),
+            .headerSearchPath("../../.."),                 // src/
+            .headerSearchPath("../../../common"),
+            .headerSearchPath("../../../common/sha3"),
+            .headerSearchPath("../../../common/sha3/xkcp_low/KeccakP-1600/plain-64bits"),
+            .headerSearchPath("../../../common/rand"),
+            .headerSearchPath("../../../../include"),       // Sources/Cliboqs/include for <oqs/...>
+        ]
+    )
+}
+
 let package = Package(
     name: "liboqs-swift",
     platforms: [
@@ -268,6 +312,12 @@ let package = Package(
     targets: [
         .target(
             name: "Cliboqs",
+            dependencies: [
+                "CliboqsMAYO1",
+                "CliboqsMAYO2",
+                "CliboqsMAYO3",
+                "CliboqsMAYO5",
+            ],
             path: "Sources/Cliboqs",
             exclude: cliboqsExclude,
             publicHeadersPath: "include",
@@ -292,6 +342,10 @@ let package = Package(
                 .headerSearchPath("include"),
             ]
         ),
+        mayoTarget(name: "CliboqsMAYO1", variantDir: "pqmayo_mayo-1_opt", variantMacro: "MAYO_1", stackEfficient: true),
+        mayoTarget(name: "CliboqsMAYO2", variantDir: "pqmayo_mayo-2_opt", variantMacro: "MAYO_2", stackEfficient: false),
+        mayoTarget(name: "CliboqsMAYO3", variantDir: "pqmayo_mayo-3_opt", variantMacro: "MAYO_3", stackEfficient: true),
+        mayoTarget(name: "CliboqsMAYO5", variantDir: "pqmayo_mayo-5_opt", variantMacro: "MAYO_5", stackEfficient: true),
         .target(
             name: "OQS",
             dependencies: ["Cliboqs"],
