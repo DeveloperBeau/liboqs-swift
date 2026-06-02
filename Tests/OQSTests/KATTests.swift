@@ -112,4 +112,26 @@ import Foundation
             + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "BIKE-L1")))
     }
+
+    @Test("XMSS-SHA2_10_256 KAT digest matches committed hash")
+    func xmssSha2H10KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let key = try XMSS.PrivateKey(.sha2_10_256)
+        var serialized: Data? = nil
+        let sig = try key.signature(for: Data("KAT".utf8)) { serialized = $0 }
+        let blob = key.publicKey.rawRepresentation + (serialized ?? Data()) + sig
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "XMSS-SHA2_10_256")))
+    }
+
+    @Test("LMS_SHA256_H5_W1 KAT digest matches committed hash")
+    func lmsH5W1KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let key = try LMS.PrivateKey(.sha256_h5_w1)
+        var serialized: Data? = nil
+        let sig = try key.signature(for: Data("KAT".utf8)) { serialized = $0 }
+        let blob = key.publicKey.rawRepresentation + (serialized ?? Data()) + sig
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "LMS_SHA256_H5_W1")))
+    }
 }

@@ -318,6 +318,36 @@ import Foundation
 
     // MARK: - Error descriptions
 
+    // MARK: - Stateful hash signature keygen (feasible variants only)
+    //
+    // Stateful keygen builds a hash tree whose cost grows with tree height H.
+    // We smoke only the small/feasible sets. Larger sets are
+    // name-resolution-tested in STFLResolveTests and carry DocC `- Warning`s for
+    // keygen cost. Empirically excluded as infeasible/too slow for CI:
+    //   - XMSS h16, h20
+    //   - XMSSMT h40/*, h60/*
+    //   - LMS H15*, H20*, H25*, and 2-level chains topping h15/h20
+    // (XMSS h10 ~3.4s, XMSSMT 20/2 ~6.7s, LMS h10 ~5s; all measured locally.)
+
+    @Test("XMSS-SHA2_10_256 keygen")
+    func xmssSha2H10() throws { _ = try XMSS.PrivateKey(.sha2_10_256) }
+    @Test("XMSS-SHAKE_10_256 keygen")
+    func xmssShake128H10() throws { _ = try XMSS.PrivateKey(.shake128_10_256) }
+    @Test("XMSS-SHA2_10_192 keygen")
+    func xmssSha2H10_192() throws { _ = try XMSS.PrivateKey(.sha2_10_192) }
+
+    @Test("XMSSMT-SHA2_20/2_256 keygen")
+    func xmssmtSha2H20_2() throws { _ = try XMSSMT.PrivateKey(.sha2_h20_2) }
+
+    @Test("LMS H5/W1 keygen")
+    func lmsH5W1() throws { _ = try LMS.PrivateKey(.sha256_h5_w1) }
+    @Test("LMS H5/W8 keygen")
+    func lmsH5W8() throws { _ = try LMS.PrivateKey(.sha256_h5_w8) }
+    @Test("LMS H10/W8 keygen")
+    func lmsH10W8() throws { _ = try LMS.PrivateKey(.sha256_h10_w8) }
+    @Test("LMS H5/W8_H5/W8 two-level keygen")
+    func lmsH5W8H5W8() throws { _ = try LMS.PrivateKey(.sha256_h5_w8_h5_w8) }
+
     @Test("All OQSError cases produce non-empty descriptions")
     func errorDescriptionsNonEmpty() {
         let cases: [OQSError] = [

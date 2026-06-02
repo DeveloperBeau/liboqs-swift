@@ -76,3 +76,16 @@ let valid = try signingKey.publicKey.isValidSignature(signature, for: messageDat
 - ``SLHDSAPureSHAKE192f``
 - ``SLHDSAPureSHAKE256s``
 - ``SLHDSAPureSHAKE256f``
+
+### Stateful Hash-Based Signatures
+
+Stateful schemes (XMSS, XMSS^MT, LMS) consume a one-time key index on every
+signature; reusing an index breaks security. Their `PrivateKey` is a reference
+type that owns mutable key state, and signing takes a persist closure — a
+signature is returned only once the advanced state has been durably stored. See
+each type's docs for the full pattern and the keygen-cost warnings on large
+parameter sets.
+
+- ``XMSS``
+- ``XMSSMT``
+- ``LMS``
