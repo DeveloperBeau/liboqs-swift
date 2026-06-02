@@ -197,4 +197,22 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
         #expect(try signingKey.publicKey.isValidSignature(sig1, for: testMessage))
         #expect(try signingKey.publicKey.isValidSignature(sig2, for: testMessage))
     }
+
+    // MARK: - SLH-DSA prehash
+
+    @Test("SLH-DSA prehash SHA2-224 / SHA2-128f round-trip")
+    func roundTripSLHDSAPrehash() throws {
+        let key = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_224, paramSet: .sha2_128f)
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("SLH-DSA prehash fast param sets keygen")
+    func prehashFastKeygen() throws {
+        let fast: [SLHDSA.Prehash.ParamSet] = [.sha2_128f, .sha2_192f, .sha2_256f,
+                                               .shake_128f, .shake_192f, .shake_256f]
+        for ps in fast {
+            _ = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_256, paramSet: ps)
+        }
+    }
 }
