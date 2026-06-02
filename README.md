@@ -1,6 +1,6 @@
-# swift-oqs
+# liboqs-swift
 
-[![CI](https://github.com/DeveloperBeau/swift-oqs/actions/workflows/ci.yml/badge.svg)](https://github.com/DeveloperBeau/swift-oqs/actions/workflows/ci.yml)
+[![CI](https://github.com/DeveloperBeau/liboqs-swift/actions/workflows/ci.yml/badge.svg)](https://github.com/DeveloperBeau/liboqs-swift/actions/workflows/ci.yml)
 
 Post-quantum cryptography for Swift, powered by [liboqs](https://github.com/open-quantum-safe/liboqs).
 
@@ -52,7 +52,7 @@ That's what this library does. The KEM replaces the old Diffie-Hellman key excha
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/DeveloperBeau/swift-oqs.git", from: "2.0.0"),
+    .package(url: "https://github.com/DeveloperBeau/liboqs-swift.git", from: "2.0.0"),
 ]
 ```
 
