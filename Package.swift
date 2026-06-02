@@ -147,8 +147,21 @@ let cliboqsExclude: [String] = [
     // UOV (requires OpenSSL, disabled)
     "src/sig/uov",
 
-    // MAYO (each variant needs different compile-time params, incompatible with SPM)
-    "src/sig/mayo",
+    // MAYO opt variants build via generated unity_*.c TUs; the raw opt dirs are
+    // excluded (their .c files are #included into the unity TU instead) and the
+    // avx2/neon dirs are unused.
+    "src/sig/mayo/pqmayo_mayo-1_opt",
+    "src/sig/mayo/pqmayo_mayo-2_opt",
+    "src/sig/mayo/pqmayo_mayo-3_opt",
+    "src/sig/mayo/pqmayo_mayo-5_opt",
+    "src/sig/mayo/pqmayo_mayo-1_avx2",
+    "src/sig/mayo/pqmayo_mayo-2_avx2",
+    "src/sig/mayo/pqmayo_mayo-3_avx2",
+    "src/sig/mayo/pqmayo_mayo-5_avx2",
+    "src/sig/mayo/pqmayo_mayo-1_neon",
+    "src/sig/mayo/pqmayo_mayo-2_neon",
+    "src/sig/mayo/pqmayo_mayo-3_neon",
+    "src/sig/mayo/pqmayo_mayo-5_neon",
 
     // CUDA/Icicle GPU
     "src/kem/ml_kem/cupqc_ml-kem-512_cuda",

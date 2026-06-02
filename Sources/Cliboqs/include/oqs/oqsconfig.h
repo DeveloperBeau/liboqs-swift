@@ -104,9 +104,14 @@
 #define OQS_ENABLE_SIG_sphincs_shake_256f_simple 1
 #define OQS_ENABLE_SIG_sphincs_shake_256s_simple 1
 
-// MAYO disabled: each variant requires different compile-time parameters,
-// incompatible with SPM's single-flags-per-target model.
-// #define OQS_ENABLE_SIG_MAYO 1
+// MAYO enabled via generated per-variant unity translation units (see
+// scripts/vendor-liboqs.sh); each variant's compile-time parameters are baked
+// into its unity_*.c rather than passed as SPM per-target flags.
+#define OQS_ENABLE_SIG_MAYO 1
+#define OQS_ENABLE_SIG_mayo_1 1
+#define OQS_ENABLE_SIG_mayo_2 1
+#define OQS_ENABLE_SIG_mayo_3 1
+#define OQS_ENABLE_SIG_mayo_5 1
 
 #define OQS_ENABLE_SIG_CROSS 1
 #define OQS_ENABLE_SIG_cross_rsdp_128_balanced 1

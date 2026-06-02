@@ -4,8 +4,8 @@
 #define ARITHMETIC_FIXED_H
 
 #include <stdint.h>
-#include <mayo.h>
-#include <simple_arithmetic.h>
+#include "mayo.h"
+#include "simple_arithmetic.h"
 
 // This implements arithmetic for vectors of X field elements in Z_2[x]/(x^4+x+1)
 
