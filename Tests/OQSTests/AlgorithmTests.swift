@@ -223,6 +223,32 @@ import Foundation
     @Test("ML-DSA-87 keygen")
     func mldsa87() throws { _ = try MLDSA87.PrivateKey() }
 
+    // MARK: - Signature key generation: SNOVA
+
+    // SNOVA's larger parameter sets allocate very large on-stack buffers during
+    // keygen/sign. The following four crash (uncatchable SIGBUS) on the default
+    // swift-testing worker-thread stack and are excluded from CI keygen tests:
+    // SNOVA_37_8_4, SNOVA_49_11_3, SNOVA_56_25_2, SNOVA_60_10_4. Their types
+    // compile and are name-resolution-tested in SNOVAResolveTests; their docs
+    // carry a warning that they require a large thread stack.
+
+    @Test("SNOVA_24_5_4 keygen")
+    func snova2454() throws { _ = try SNOVA24_5_4.PrivateKey() }
+    @Test("SNOVA_24_5_4_SHAKE keygen")
+    func snova2454SHAKE() throws { _ = try SNOVA24_5_4_SHAKE.PrivateKey() }
+    @Test("SNOVA_24_5_4_esk keygen")
+    func snova2454esk() throws { _ = try SNOVA24_5_4_esk.PrivateKey() }
+    @Test("SNOVA_24_5_4_SHAKE_esk keygen")
+    func snova2454SHAKEesk() throws { _ = try SNOVA24_5_4_SHAKE_esk.PrivateKey() }
+    @Test("SNOVA_24_5_5 keygen")
+    func snova2455() throws { _ = try SNOVA24_5_5.PrivateKey() }
+    @Test("SNOVA_25_8_3 keygen")
+    func snova2583() throws { _ = try SNOVA25_8_3.PrivateKey() }
+    @Test("SNOVA_29_6_5 keygen")
+    func snova2965() throws { _ = try SNOVA29_6_5.PrivateKey() }
+    @Test("SNOVA_37_17_2 keygen")
+    func snova37172() throws { _ = try SNOVA37_17_2.PrivateKey() }
+
     // MARK: - KEM key generation: Kyber (deprecated)
 
     @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")
