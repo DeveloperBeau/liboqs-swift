@@ -158,6 +158,14 @@ import Foundation
         #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
     }
 
+    @Test("sntrup761 round-trip")
+    func roundTripSNTRUP761() throws {
+        let sk = try SNTRUP761.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let secret = try sk.decryptSharedSecret(sealed.ciphertext)
+        #expect(secret.rawRepresentation == sealed.sharedSecret.rawRepresentation)
+    }
+
     // MARK: - Key pair uniqueness
 
     @Test("Key pairs are unique")

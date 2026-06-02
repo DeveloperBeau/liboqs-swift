@@ -60,6 +60,11 @@ import Foundation
     @Test("NTRU-HRSS-1373 keygen")
     func ntruHRSS1373() throws { _ = try NTRUHRSS1373.PrivateKey() }
 
+    // MARK: - KEM key generation: NTRU Prime
+
+    @Test("sntrup761 keygen")
+    func sntrup761() throws { _ = try SNTRUP761.PrivateKey() }
+
     // MARK: - Signature key generation: Falcon
 
     @Test("Falcon-512 keygen")

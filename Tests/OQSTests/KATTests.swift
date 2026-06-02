@@ -39,4 +39,15 @@ import Foundation
             + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "NTRU-HPS-2048-509")))
     }
+
+    @Test("sntrup761 KAT digest matches committed hash")
+    func sntrup761KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let sk = try SNTRUP761.PrivateKey()
+        let sealed = try sk.publicKey.generateSharedSecret()
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "sntrup761")))
+    }
 }
