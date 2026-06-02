@@ -252,7 +252,7 @@ let cliboqsExclude: [String] = [
 ]
 
 let package = Package(
-    name: "swift-oqs",
+    name: "liboqs-swift",
     platforms: [
         .macOS(.v13),
         .iOS(.v16),

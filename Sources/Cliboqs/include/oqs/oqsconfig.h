@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Generated for swift-oqs vendored build of liboqs 0.15.0
+// Generated for liboqs-swift vendored build of liboqs 0.15.0
 // Portable-only build: no platform-specific optimized variants.
 
 #ifndef OQS_OQSCONFIG_H
