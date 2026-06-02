@@ -11,6 +11,12 @@ internal import Cliboqs
 /// This `24-5-5` set increases the matrix rank to 5, trading larger keys and
 /// signatures for a higher security margin than the `24-5-4` baseline.
 ///
+/// - Warning: Signing allocates very large on-stack buffers (rank-5 layout).
+///   On a thread with a small stack (e.g. a background or test-runner thread),
+///   ``PrivateKey/signature(for:)`` crashes with an uncatchable SIGBUS rather
+///   than throwing. Sign on the main thread or a thread with a several-MB
+///   stack. Key generation is unaffected.
+///
 /// ```swift
 /// // Generate a signing key
 /// let signer = try SNOVA24_5_5.PrivateKey()

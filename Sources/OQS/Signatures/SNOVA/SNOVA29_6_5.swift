@@ -11,6 +11,12 @@ internal import Cliboqs
 /// This `29-6-5` set uses a rank-5 layout, targeting a stronger security
 /// tier than the smaller variants.
 ///
+/// - Warning: Signing allocates very large on-stack buffers (rank-5 layout).
+///   On a thread with a small stack (e.g. a background or test-runner thread),
+///   ``PrivateKey/signature(for:)`` crashes with an uncatchable SIGBUS rather
+///   than throwing. Sign on the main thread or a thread with a several-MB
+///   stack. Key generation is unaffected.
+///
 /// ```swift
 /// // Generate a signing key
 /// let signer = try SNOVA29_6_5.PrivateKey()

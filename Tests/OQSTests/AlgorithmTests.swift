@@ -225,12 +225,15 @@ import Foundation
 
     // MARK: - Signature key generation: SNOVA
 
-    // SNOVA's larger parameter sets allocate very large on-stack buffers during
-    // keygen/sign. The following four crash (uncatchable SIGBUS) on the default
-    // swift-testing worker-thread stack and are excluded from CI keygen tests:
-    // SNOVA_37_8_4, SNOVA_49_11_3, SNOVA_56_25_2, SNOVA_60_10_4. Their types
-    // compile and are name-resolution-tested in SNOVAResolveTests; their docs
-    // carry a warning that they require a large thread stack.
+    // SNOVA's larger parameter sets allocate very large on-stack buffers and
+    // crash (uncatchable SIGBUS) on the default swift-testing worker-thread stack:
+    //   - keygen crashers (4), excluded from CI keygen tests below:
+    //     SNOVA_37_8_4, SNOVA_49_11_3, SNOVA_56_25_2, SNOVA_60_10_4.
+    //   - sign-only crashers (2), keygen-tested below but NOT sign-roundtrip-tested:
+    //     SNOVA_24_5_5, SNOVA_29_6_5 (rank-5; keygen fits the stack, signing does not).
+    // All 12 types compile and are name-resolution-tested in SNOVAResolveTests; the
+    // 6 crash-prone variants carry a doc warning about the large-thread-stack
+    // requirement (keygen-specific for the four, sign-specific for the two).
 
     @Test("SNOVA_24_5_4 keygen")
     func snova2454() throws { _ = try SNOVA24_5_4.PrivateKey() }
