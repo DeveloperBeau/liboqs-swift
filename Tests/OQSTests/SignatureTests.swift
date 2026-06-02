@@ -92,6 +92,32 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
         #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
     }
 
+    @Test("MAYO-1 sign/verify")
+    func roundTripMAYO1() throws {
+        let key = try MAYO1.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("MAYO-2 sign/verify")
+    func roundTripMAYO2() throws {
+        let key = try MAYO2.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    @Test("MAYO-3 sign/verify")
+    func roundTripMAYO3() throws {
+        let key = try MAYO3.PrivateKey()
+        let sig = try key.signature(for: testMessage)
+        #expect(try key.publicKey.isValidSignature(sig, for: testMessage))
+    }
+
+    // MAYO-5 keygen allocates very large on-stack buffers and crashes
+    // (uncatchable SIGBUS) on the swift-testing worker-thread stack, so it has
+    // no sign-roundtrip test here. It works on a large thread stack and is
+    // name-resolution-tested in MAYOResolveTests. See the doc warning on MAYO5.
+
     // MARK: - Empty message
 
     @Test("Sign and verify empty message")

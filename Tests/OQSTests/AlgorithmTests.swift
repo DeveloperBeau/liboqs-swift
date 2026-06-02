@@ -252,6 +252,22 @@ import Foundation
     @Test("SNOVA_37_17_2 keygen")
     func snova37172() throws { _ = try SNOVA37_17_2.PrivateKey() }
 
+    // MARK: - Signature key generation: MAYO
+
+    // MAYO-5's largest parameter set allocates very large on-stack buffers and
+    // crashes (uncatchable SIGBUS) on the default swift-testing worker-thread
+    // stack during key generation. It is verified to work on a large stack
+    // (32 MB) but is excluded here and from sign-roundtrip tests; the type
+    // compiles and is name-resolution-tested in MAYOResolveTests, and carries a
+    // doc warning about the large-thread-stack requirement.
+
+    @Test("MAYO-1 keygen")
+    func mayo1() throws { _ = try MAYO1.PrivateKey() }
+    @Test("MAYO-2 keygen")
+    func mayo2() throws { _ = try MAYO2.PrivateKey() }
+    @Test("MAYO-3 keygen")
+    func mayo3() throws { _ = try MAYO3.PrivateKey() }
+
     // MARK: - KEM key generation: Kyber (deprecated)
 
     @available(*, deprecated, message: "Exercises deprecated Kyber on purpose")

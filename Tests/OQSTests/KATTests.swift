@@ -72,6 +72,16 @@ import Foundation
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "ML-DSA-44")))
     }
 
+    @Test("MAYO-1 KAT digest matches committed hash")
+    func mayo1KAT() throws {
+        KAT.seedDeterministicRNG()
+        defer { KAT.restoreSystemRNG() }
+        let key = try MAYO1.PrivateKey()
+        let sig = try key.signature(for: Data("KAT".utf8))
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "MAYO-1")))
+    }
+
     @Test("SNOVA_24_5_4 KAT digest matches committed hash")
     func snova2454KAT() throws {
         KAT.seedDeterministicRNG()
