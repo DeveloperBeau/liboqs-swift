@@ -25,6 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: DeveloperBeau/setup-swift@v1
+        with:
+          swift-version: '6.3.2'
       - name: Build
         run: swift build -v
       - name: Test (parallel bulk, excludes KAT)

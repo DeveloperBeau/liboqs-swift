@@ -44,6 +44,8 @@ jobs:
       - name: Setup Swift
         if: steps.compare.outputs.update_available == 'true'
         uses: DeveloperBeau/setup-swift@v1
+        with:
+          swift-version: '6.3.2'
 
       - name: Build and test
         if: steps.compare.outputs.update_available == 'true'
