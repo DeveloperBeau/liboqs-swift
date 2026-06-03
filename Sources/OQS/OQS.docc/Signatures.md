@@ -19,6 +19,12 @@ let valid = try signingKey.publicKey.isValidSignature(signature, for: messageDat
 
 ## Topics
 
+### ML-DSA (FIPS 204)
+
+- ``MLDSA44``
+- ``MLDSA65``
+- ``MLDSA87``
+
 ### Falcon
 
 - ``Falcon512``
@@ -76,6 +82,60 @@ let valid = try signingKey.publicKey.isValidSignature(signature, for: messageDat
 - ``SLHDSAPureSHAKE192f``
 - ``SLHDSAPureSHAKE256s``
 - ``SLHDSAPureSHAKE256f``
+
+### SLH-DSA Pre-Hash (FIPS 205)
+
+For signing a message digest rather than the message itself, the ``SLHDSA``
+namespace provides a single parameterized `SLHDSA.Prehash` type. Its
+`PrivateKey(prehash:paramSet:)` initializer selects one of the 144 combinations
+of pre-hash function (SHA2 / SHA3 / SHAKE) and SLH-DSA parameter set:
+
+```swift
+let signer = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_256, paramSet: .sha2_128f)
+```
+
+- ``SLHDSA``
+
+### MAYO
+
+- ``MAYO1``
+- ``MAYO2``
+- ``MAYO3``
+- ``MAYO5``
+
+> ``MAYO5`` key generation allocates very large stack buffers and needs a
+> thread with a multi-megabyte stack. Avoid generating it on a small-stack
+> background thread.
+
+### SNOVA
+
+- ``SNOVA24_5_4``
+- ``SNOVA24_5_4_SHAKE``
+- ``SNOVA24_5_4_esk``
+- ``SNOVA24_5_4_SHAKE_esk``
+- ``SNOVA24_5_5``
+- ``SNOVA25_8_3``
+- ``SNOVA29_6_5``
+- ``SNOVA37_8_4``
+- ``SNOVA37_17_2``
+- ``SNOVA49_11_3``
+- ``SNOVA56_25_2``
+- ``SNOVA60_10_4``
+
+### UOV
+
+- ``OVIs``
+- ``OVIp``
+- ``OVIII``
+- ``OVV``
+- ``OVIsPKC``
+- ``OVIpPKC``
+- ``OVIIIPKC``
+- ``OVVPKC``
+- ``OVIsPKCSKC``
+- ``OVIpPKCSKC``
+- ``OVIIIPKCSKC``
+- ``OVVPKCSKC``
 
 ### Stateful Hash-Based Signatures
 
