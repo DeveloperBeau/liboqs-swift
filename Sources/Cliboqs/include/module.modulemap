@@ -1,4 +1,8 @@
 module Cliboqs {
     umbrella header "oqs/oqs.h"
+    // Additive, non-vendored bounds-safe shim. The vendored umbrella oqs.h must
+    // stay byte-pristine, so it cannot #include this; declare it explicitly here
+    // so it joins the module (and to silence -Wincomplete-umbrella).
+    header "oqs/oqs_safe.h"
     export *
 }

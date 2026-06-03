@@ -9,6 +9,7 @@ let experimentalFeatures: [SwiftSetting] = [
     .enableExperimentalFeature("BitwiseCopyable"),
     .enableExperimentalFeature("MoveOnlyTypes"),
     .enableExperimentalFeature("LifetimeDependence"),
+    .enableExperimentalFeature("SafeInteropWrappers"),
 ]
 
 // Platform-specific optimized implementations excluded from the portable build.

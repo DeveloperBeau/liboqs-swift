@@ -16,9 +16,7 @@ func sigGenerateKeyPair(algorithm: String) throws -> (publicKey: Data, secretKey
 
     let rc = publicKey.withUnsafeMutableBytes { pk in
         secretKey.withUnsafeMutableBytes { sk in
-            OQS_SIG_keypair(sig,
-                pk.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                sk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+            oqs_sig_keypair_safe(sig, pk, sk)
         }
     }
     guard rc == OQS_SUCCESS else { throw OQSError.keyGenerationFailed }
@@ -46,12 +44,7 @@ func sigSign(algorithm: String, message: Data, secretKey: Data) throws -> Data {
     let rc = message.withUnsafeBytes { msg in
         secretKey.withUnsafeBytes { sk in
             signature.withUnsafeMutableBytes { sigBuf in
-                OQS_SIG_sign(sig,
-                    sigBuf.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    &actualSigLen,
-                    msg.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    message.count,
-                    sk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+                oqs_sig_sign_safe(sig, sigBuf, &actualSigLen, msg, sk)
             }
         }
     }
@@ -77,12 +70,7 @@ func sigVerify(algorithm: String, message: Data, signature: Data, publicKey: Dat
     let rc = message.withUnsafeBytes { msg in
         signature.withUnsafeBytes { sigBuf in
             publicKey.withUnsafeBytes { pk in
-                OQS_SIG_verify(sig,
-                    msg.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    message.count,
-                    sigBuf.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    signature.count,
-                    pk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+                oqs_sig_verify_safe(sig, msg, sigBuf, pk)
             }
         }
     }

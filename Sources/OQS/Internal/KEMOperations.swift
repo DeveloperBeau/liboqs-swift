@@ -16,9 +16,7 @@ func kemGenerateKeyPair(algorithm: String) throws -> (publicKey: Data, secretKey
 
     let rc = publicKey.withUnsafeMutableBytes { pk in
         secretKey.withUnsafeMutableBytes { sk in
-            OQS_KEM_keypair(kem,
-                pk.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                sk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+            oqs_kem_keypair_safe(kem, pk, sk)
         }
     }
     guard rc == OQS_SUCCESS else { throw OQSError.keyGenerationFailed }
@@ -47,10 +45,7 @@ func kemEncapsulate(algorithm: String, publicKey: Data) throws -> (ciphertext: D
     let rc = publicKey.withUnsafeBytes { pk in
         ciphertext.withUnsafeMutableBytes { ct in
             sharedSecret.withUnsafeMutableBytes { ss in
-                OQS_KEM_encaps(kem,
-                    ct.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    ss.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    pk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+                oqs_kem_encaps_safe(kem, ct, ss, pk)
             }
         }
     }
@@ -82,10 +77,7 @@ func kemDecapsulate(algorithm: String, ciphertext: Data, secretKey: Data) throws
     let rc = ciphertext.withUnsafeBytes { ct in
         secretKey.withUnsafeBytes { sk in
             sharedSecret.withUnsafeMutableBytes { ss in
-                OQS_KEM_decaps(kem,
-                    ss.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    ct.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    sk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+                oqs_kem_decaps_safe(kem, ss, ct, sk)
             }
         }
     }
