@@ -102,7 +102,7 @@ let valid = try signingKey.publicKey.isValidSignature(signature, for: message)
 
 ## Algorithms
 
-The full liboqs 0.15.0 algorithm surface is exposed. Each algorithm is its own Swift type with `PrivateKey` and `PublicKey`.
+Every liboqs 0.15.0 algorithm has its own Swift type with a `PrivateKey` and `PublicKey`.
 
 ### Key encapsulation
 
@@ -115,7 +115,7 @@ The full liboqs 0.15.0 algorithm surface is exposed. Each algorithm is its own S
 | Classic McEliece | `ClassicMcEliece348864`, `ClassicMcEliece460896`, `ClassicMcEliece6688128`, `ClassicMcEliece6960119`, `ClassicMcEliece8192128`, plus the fast-keygen `…f` variants (`ClassicMcEliece348864f`, etc.) |
 | HQC | `HQC128`, `HQC192`, `HQC256` |
 | BIKE | `BIKEL1`, `BIKEL3`, `BIKEL5` |
-| Kyber (**deprecated**) | `Kyber512`, `Kyber768`, `Kyber1024` — superseded by ML-KEM; use `MLKEM512` / `MLKEM768` / `MLKEM1024` instead |
+| Kyber (**deprecated**) | `Kyber512`, `Kyber768`, `Kyber1024`. Superseded by ML-KEM; reach for the `MLKEM*` types instead |
 
 ### Signatures
 
@@ -136,10 +136,10 @@ The full liboqs 0.15.0 algorithm surface is exposed. Each algorithm is its own S
 
 ### Stateful signatures
 
-XMSS, XMSS^MT, and LMS are *stateful* hash-based schemes: every signature consumes a one-time key index that must never be reused, or security is lost. They use a different API from the rest of the library:
+XMSS, XMSS^MT, and LMS are *stateful* hash-based schemes: every signature consumes a one-time key index, and reusing an index breaks the scheme. They use a different API from the rest of the library:
 
 - `PrivateKey` is a reference type (a `final class`) that owns mutable key state and is intentionally **not** `Sendable`.
-- `signature(for:persistingTo:)` returns a signature only after a persist closure has durably stored the advanced key state. If the closure throws, no signature is produced.
+- `signature(for:persistingTo:)` hands you a signature only after your persist closure durably stores the advanced key state. If the closure throws, you get no signature.
 - Verification (`isValidSignature(_:for:)`) is stateless.
 
 ```swift
@@ -158,7 +158,7 @@ let pub = XMSS.PublicKey(.sha2_10_256, rawRepresentation: key.publicKey.rawRepre
 let ok = try pub.isValidSignature(sig, for: message)
 ```
 
-Large parameter sets (XMSS/XMSS^MT height-16 and height-20 trees, and the bigger LMS sets) are name-resolvable but have very expensive key generation; generate them off the hot path, not in CI.
+Large parameter sets (XMSS/XMSS^MT height-16 and height-20 trees, and the bigger LMS sets) resolve by name but take a long time to generate. Build them off the hot path.
 
 ## Vendored liboqs
 
