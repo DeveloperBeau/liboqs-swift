@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: DeveloperBeau/resolve-swift@v2
         with:
-          swift-version: '6.3.2'
+          swift-version: '6.3'
       - name: Build
         run: swift build -v
       - name: Test (parallel bulk, excludes KAT)
