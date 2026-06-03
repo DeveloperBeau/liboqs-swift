@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-#include "api.h"
-#include "mayo.h"
+#include <api.h>
+#include <mayo.h>
 
 #ifdef ENABLE_PARAMS_DYNAMIC
 #define MAYO_PARAMS &MAYO_1

@@ -4,7 +4,7 @@
 #define ARITHMETIC_DYNAMIC_H
 
 #include <stdint.h>
-#include "simple_arithmetic.h"
+#include <simple_arithmetic.h>
 
 static
 inline void m_vec_copy(int m_vec_limbs, const uint64_t *in, uint64_t *out) {
