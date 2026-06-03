@@ -60,11 +60,33 @@ let importedPub = try MLKEM768.PublicKey(rawRepresentation: pubData)
 
 ## Topics
 
-### ML-KEM (NIST Standard)
+### ML-KEM (FIPS 203)
 
 - ``MLKEM512``
 - ``MLKEM768``
 - ``MLKEM1024``
+
+### FrodoKEM
+
+- ``FrodoKEM640AES``
+- ``FrodoKEM640SHAKE``
+- ``FrodoKEM976AES``
+- ``FrodoKEM976SHAKE``
+- ``FrodoKEM1344AES``
+- ``FrodoKEM1344SHAKE``
+
+### NTRU
+
+- ``NTRUHPS2048509``
+- ``NTRUHPS2048677``
+- ``NTRUHPS4096821``
+- ``NTRUHPS40961229``
+- ``NTRUHRSS701``
+- ``NTRUHRSS1373``
+
+### NTRU Prime
+
+- ``SNTRUP761``
 
 ### HQC
 
@@ -74,8 +96,29 @@ let importedPub = try MLKEM768.PublicKey(rawRepresentation: pubData)
 
 ### Classic McEliece
 
+The `…f` variants use the same parameters with faster key generation.
+
 - ``ClassicMcEliece348864``
+- ``ClassicMcEliece348864f``
 - ``ClassicMcEliece460896``
+- ``ClassicMcEliece460896f``
 - ``ClassicMcEliece6688128``
+- ``ClassicMcEliece6688128f``
 - ``ClassicMcEliece6960119``
+- ``ClassicMcEliece6960119f``
 - ``ClassicMcEliece8192128``
+- ``ClassicMcEliece8192128f``
+
+### BIKE
+
+- ``BIKEL1``
+- ``BIKEL3``
+- ``BIKEL5``
+
+### Kyber (Deprecated)
+
+Kyber predates the final ML-KEM standard and is deprecated. Use the ``MLKEM512`` / ``MLKEM768`` / ``MLKEM1024`` types instead.
+
+- ``Kyber512``
+- ``Kyber768``
+- ``Kyber1024``
