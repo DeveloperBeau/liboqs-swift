@@ -6,8 +6,8 @@ internal import Cliboqs
 /// MAYO is a multivariate signature scheme from the Oil-and-Vinegar family,
 /// submitted to the NIST additional digital-signature standardization effort.
 /// Its security rests on the hardness of solving structured systems of
-/// multivariate quadratic equations, and it offers very small keys — the secret
-/// key is essentially a short seed (a few dozen bytes) — and compact signatures.
+/// multivariate quadratic equations, and it offers very small keys (the secret
+/// key is essentially a short seed of a few dozen bytes) and compact signatures.
 /// MAYO-5 is the largest parameter set, targeting the highest security tier.
 ///
 /// - Warning: This parameter set allocates very large buffers on the stack
