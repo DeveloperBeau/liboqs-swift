@@ -8,7 +8,7 @@ internal import Cliboqs
 /// It is a reference type because the secret key is a mutable C object whose
 /// one-time-key index advances on every sign; copying the pointer would let two
 /// owners race the same index (a key-reuse catastrophe). It is intentionally NOT
-/// `Sendable` — it must not cross isolation boundaries.
+/// `Sendable` and must not cross isolation boundaries.
 final class StatefulSigningKey {
     private let algorithm: String
     private let sig: UnsafeMutablePointer<OQS_SIG_STFL>
