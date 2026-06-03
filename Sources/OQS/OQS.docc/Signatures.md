@@ -141,9 +141,9 @@ let signer = try SLHDSA.Prehash.PrivateKey(prehash: .sha2_256, paramSet: .sha2_1
 
 Stateful schemes (XMSS, XMSS^MT, LMS) consume a one-time key index on every
 signature; reusing an index breaks security. Their `PrivateKey` is a reference
-type that owns mutable key state, and signing takes a persist closure — a
-signature is returned only once the advanced state has been durably stored. See
-each type's docs for the full pattern and the keygen-cost warnings on large
+type that owns mutable key state. Signing takes a persist closure and hands
+back a signature only once that closure has durably stored the advanced state.
+See each type's docs for the full pattern and the keygen-cost warnings on large
 parameter sets.
 
 - ``XMSS``
