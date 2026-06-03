@@ -23,8 +23,17 @@
 #ifndef OQS_SAFE_H
 #define OQS_SAFE_H
 
-#include <ptrcheck.h>
 #include <oqs/oqs.h>
+
+/* The bounds-safe wrappers below depend on <ptrcheck.h> (which provides the
+ * `__sized_by` / `__counted_by` annotation macros). Most Swift toolchains ship
+ * it, but some — notably the Android Swift SDK — do not. When it is absent this
+ * header compiles to nothing: callers select the manual pointer FFI instead,
+ * gated on the matching `OQS_SAFE_INTEROP` Swift active-compilation condition
+ * (see Package.swift). The two gates MUST stay aligned. */
+#if __has_include(<ptrcheck.h>)
+
+#include <ptrcheck.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -131,5 +140,7 @@ static inline OQS_STATUS oqs_sig_stfl_verify_safe(
 #if defined(__cplusplus)
 }
 #endif
+
+#endif /* __has_include(<ptrcheck.h>) */
 
 #endif /* OQS_SAFE_H */

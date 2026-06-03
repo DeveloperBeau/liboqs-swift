@@ -414,7 +414,15 @@ let package = Package(
         .target(
             name: "OQS",
             dependencies: ["Cliboqs"],
-            swiftSettings: experimentalFeatures
+            // `OQS_SAFE_INTEROP` selects the bounds-safe `*_safe` overloads from
+            // oqs_safe.h. It is defined ONLY on toolchains that ship <ptrcheck.h>
+            // (so the `__sized_by`-annotated wrappers actually exist). Android's
+            // Swift SDK lacks ptrcheck.h, so it is excluded and falls back to the
+            // manual pointer FFI. This list MUST stay aligned with the
+            // `__has_include(<ptrcheck.h>)` guard in oqs_safe.h.
+            swiftSettings: experimentalFeatures + [
+                .define("OQS_SAFE_INTEROP", .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .linux, .windows])),
+            ]
         ),
         .testTarget(
             name: "OQSTests",

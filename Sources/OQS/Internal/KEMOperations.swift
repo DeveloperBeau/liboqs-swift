@@ -14,11 +14,21 @@ func kemGenerateKeyPair(algorithm: String) throws -> (publicKey: Data, secretKey
     var publicKey = Data(count: pkLen)
     var secretKey = Data(count: skLen)
 
+    #if OQS_SAFE_INTEROP
     let rc = publicKey.withUnsafeMutableBytes { pk in
         secretKey.withUnsafeMutableBytes { sk in
             oqs_kem_keypair_safe(kem, pk, sk)
         }
     }
+    #else
+    let rc = publicKey.withUnsafeMutableBytes { pk in
+        secretKey.withUnsafeMutableBytes { sk in
+            OQS_KEM_keypair(kem,
+                pk.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                sk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+        }
+    }
+    #endif
     guard rc == OQS_SUCCESS else { throw OQSError.keyGenerationFailed }
 
     return (publicKey: publicKey, secretKey: secretKey)
@@ -42,6 +52,7 @@ func kemEncapsulate(algorithm: String, publicKey: Data) throws -> (ciphertext: D
     var ciphertext = Data(count: ctLen)
     var sharedSecret = Data(count: ssLen)
 
+    #if OQS_SAFE_INTEROP
     let rc = publicKey.withUnsafeBytes { pk in
         ciphertext.withUnsafeMutableBytes { ct in
             sharedSecret.withUnsafeMutableBytes { ss in
@@ -49,6 +60,18 @@ func kemEncapsulate(algorithm: String, publicKey: Data) throws -> (ciphertext: D
             }
         }
     }
+    #else
+    let rc = publicKey.withUnsafeBytes { pk in
+        ciphertext.withUnsafeMutableBytes { ct in
+            sharedSecret.withUnsafeMutableBytes { ss in
+                OQS_KEM_encaps(kem,
+                    ct.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                    ss.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                    pk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+            }
+        }
+    }
+    #endif
     guard rc == OQS_SUCCESS else { throw OQSError.encapsulationFailed }
 
     return (ciphertext: ciphertext, sharedSecret: sharedSecret)
@@ -74,6 +97,7 @@ func kemDecapsulate(algorithm: String, ciphertext: Data, secretKey: Data) throws
     let ssLen = Int(kem.pointee.length_shared_secret)
     var sharedSecret = Data(count: ssLen)
 
+    #if OQS_SAFE_INTEROP
     let rc = ciphertext.withUnsafeBytes { ct in
         secretKey.withUnsafeBytes { sk in
             sharedSecret.withUnsafeMutableBytes { ss in
@@ -81,6 +105,18 @@ func kemDecapsulate(algorithm: String, ciphertext: Data, secretKey: Data) throws
             }
         }
     }
+    #else
+    let rc = ciphertext.withUnsafeBytes { ct in
+        secretKey.withUnsafeBytes { sk in
+            sharedSecret.withUnsafeMutableBytes { ss in
+                OQS_KEM_decaps(kem,
+                    ss.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                    ct.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                    sk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+            }
+        }
+    }
+    #endif
     guard rc == OQS_SUCCESS else { throw OQSError.decapsulationFailed }
 
     return sharedSecret
