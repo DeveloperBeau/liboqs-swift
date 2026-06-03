@@ -14,6 +14,13 @@ func sigGenerateKeyPair(algorithm: String) throws -> (publicKey: Data, secretKey
     var publicKey = Data(count: pkLen)
     var secretKey = Data(count: skLen)
 
+    #if OQS_SAFE_INTEROP
+    let rc = publicKey.withUnsafeMutableBytes { pk in
+        secretKey.withUnsafeMutableBytes { sk in
+            oqs_sig_keypair_safe(sig, pk, sk)
+        }
+    }
+    #else
     let rc = publicKey.withUnsafeMutableBytes { pk in
         secretKey.withUnsafeMutableBytes { sk in
             OQS_SIG_keypair(sig,
@@ -21,6 +28,7 @@ func sigGenerateKeyPair(algorithm: String) throws -> (publicKey: Data, secretKey
                 sk.baseAddress?.assumingMemoryBound(to: UInt8.self))
         }
     }
+    #endif
     guard rc == OQS_SUCCESS else { throw OQSError.keyGenerationFailed }
 
     return (publicKey: publicKey, secretKey: secretKey)
@@ -43,6 +51,15 @@ func sigSign(algorithm: String, message: Data, secretKey: Data) throws -> Data {
     var signature = Data(count: maxSigLen)
     var actualSigLen = 0
 
+    #if OQS_SAFE_INTEROP
+    let rc = message.withUnsafeBytes { msg in
+        secretKey.withUnsafeBytes { sk in
+            signature.withUnsafeMutableBytes { sigBuf in
+                oqs_sig_sign_safe(sig, sigBuf, &actualSigLen, msg, sk)
+            }
+        }
+    }
+    #else
     let rc = message.withUnsafeBytes { msg in
         secretKey.withUnsafeBytes { sk in
             signature.withUnsafeMutableBytes { sigBuf in
@@ -55,6 +72,7 @@ func sigSign(algorithm: String, message: Data, secretKey: Data) throws -> Data {
             }
         }
     }
+    #endif
     guard rc == OQS_SUCCESS else { throw OQSError.signFailed }
 
     signature.removeSubrange(actualSigLen...)
@@ -74,6 +92,15 @@ func sigVerify(algorithm: String, message: Data, signature: Data, publicKey: Dat
         throw OQSError.invalidKeySize(expected: expectedPK, actual: publicKey.count)
     }
 
+    #if OQS_SAFE_INTEROP
+    let rc = message.withUnsafeBytes { msg in
+        signature.withUnsafeBytes { sigBuf in
+            publicKey.withUnsafeBytes { pk in
+                oqs_sig_verify_safe(sig, msg, sigBuf, pk)
+            }
+        }
+    }
+    #else
     let rc = message.withUnsafeBytes { msg in
         signature.withUnsafeBytes { sigBuf in
             publicKey.withUnsafeBytes { pk in
@@ -86,6 +113,7 @@ func sigVerify(algorithm: String, message: Data, signature: Data, publicKey: Dat
             }
         }
     }
+    #endif
 
     return rc == OQS_SUCCESS
 }

@@ -33,9 +33,15 @@ final class StatefulSigningKey {
 
         let pkLen = Int(sig.pointee.length_public_key)
         var pk = Data(count: pkLen)
+        #if OQS_SAFE_INTEROP
+        let rc = pk.withUnsafeMutableBytes { p in
+            oqs_sig_stfl_keypair_safe(sig, p, sk)
+        }
+        #else
         let rc = pk.withUnsafeMutableBytes { p in
             OQS_SIG_STFL_keypair(sig, p.baseAddress?.assumingMemoryBound(to: UInt8.self), sk)
         }
+        #endif
         guard rc == OQS_SUCCESS else {
             OQS_SIG_STFL_SECRET_KEY_free(sk)
             OQS_SIG_STFL_free(sig)
@@ -135,6 +141,15 @@ final class StatefulSigningKey {
         var signature = Data(count: maxSigLen)
         var actualLen = 0
 
+        #if OQS_SAFE_INTEROP
+        let rc = withExtendedLifetime(box) {
+            message.withUnsafeBytes { msg in
+                signature.withUnsafeMutableBytes { sigBuf in
+                    oqs_sig_stfl_sign_safe(sig, sigBuf, &actualLen, msg, sk)
+                }
+            }
+        }
+        #else
         let rc = withExtendedLifetime(box) {
             message.withUnsafeBytes { msg in
                 signature.withUnsafeMutableBytes { sigBuf in
@@ -148,6 +163,7 @@ final class StatefulSigningKey {
                 }
             }
         }
+        #endif
 
         guard rc == OQS_SUCCESS else {
             // Surface the user's real persistence error if that's why we failed;
@@ -184,6 +200,15 @@ enum StatefulSignatureVerifier {
             throw OQSError.invalidKeySize(expected: expectedPK, actual: publicKey.count)
         }
 
+        #if OQS_SAFE_INTEROP
+        let rc = message.withUnsafeBytes { msg in
+            signature.withUnsafeBytes { sigBuf in
+                publicKey.withUnsafeBytes { pk in
+                    oqs_sig_stfl_verify_safe(sig, msg, sigBuf, pk)
+                }
+            }
+        }
+        #else
         let rc = message.withUnsafeBytes { msg in
             signature.withUnsafeBytes { sigBuf in
                 publicKey.withUnsafeBytes { pk in
@@ -197,6 +222,7 @@ enum StatefulSignatureVerifier {
                 }
             }
         }
+        #endif
         return rc == OQS_SUCCESS
     }
 }

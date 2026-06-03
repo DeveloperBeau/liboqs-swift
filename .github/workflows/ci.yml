@@ -24,7 +24,9 @@ jobs:
             runner: windows-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: DeveloperBeau/setup-swift@v1
+      - uses: DeveloperBeau/resolve-swift@v2
+        with:
+          swift-version: '6.3'
       - name: Build
         run: swift build -v
       - name: Test (parallel bulk, excludes KAT)
