@@ -99,39 +99,6 @@ generate_unity() {
 # -DDILITHIUM_MODE=N). config.h defaults it to 2 (ML-DSA-44) under #ifndef, so
 # 65/87 must override it or they emit ML-DSA-44's symbols. Values mirror
 # src/sig/ml_dsa/CMakeLists.txt.
-# localize_includes <family_dir> <variant_dir_glob>
-# Rewrites `#include <X.h>` -> `#include "X.h"` in every .c/.h inside each
-# matching variant dir, but ONLY when X.h actually exists in that same dir.
-# MAYO angle-includes its own variant-local headers (mayo.h, api.h, arithmetic.h,
-# ...); angle includes never search the includer's directory, and SPM cannot add
-# a per-file -I, so the unity TU (which lives one level up in the family dir)
-# can't resolve them. A global -I per variant is unsafe: api.h differs per
-# variant (different CRYPTO_*BYTES) and generic basenames (arithmetic.h, mem.h)
-# would shadow other families. Quote includes resolve relative to the including
-# file's own dir, so each variant picks up its OWN headers with no collision.
-# The existence test leaves true externals (fips202.h, randombytes.h, aes.h,
-# std*.h, the avx2/neon-only m4_/shuffle_arithmetic.h) as angle includes.
-localize_includes() {
-    local family_dir="$1"; shift
-    local glob="$1"; shift
-    local vdir f hdr
-    for vdir in "$DEST/$family_dir"/$glob; do
-        [ -d "$vdir" ] || continue
-        for f in "$vdir"/*.c "$vdir"/*.h; do
-            [ -e "$f" ] || continue
-            for hdr in "$vdir"/*.h; do
-                [ -e "$hdr" ] || continue
-                hdr="$(basename "$hdr")"
-                # Escape dots for the regex; rewrite only the local-header angle form.
-                local esc="${hdr//./\\.}"
-                sed -i.bak -E "s|#include[[:space:]]*<${esc}>|#include \"${hdr}\"|g" "$f"
-                rm -f "$f.bak"
-            done
-        done
-    done
-    echo "  localized includes under $DEST/$family_dir/$glob"
-}
-
 generate_unity "src/sig/ml_dsa" "pqcrystals-dilithium-standard_ml-dsa-44_ref" "DILITHIUM_MODE 2"
 generate_unity "src/sig/ml_dsa" "pqcrystals-dilithium-standard_ml-dsa-65_ref" "DILITHIUM_MODE 3"
 generate_unity "src/sig/ml_dsa" "pqcrystals-dilithium-standard_ml-dsa-87_ref" "DILITHIUM_MODE 5"
@@ -158,18 +125,12 @@ generate_unity "src/sig/snova" "snova_SNOVA_56_25_2_opt"         "OPTIMISATION 1
 generate_unity "src/sig/snova" "snova_SNOVA_60_10_4_opt"         "OPTIMISATION 1" "v_SNOVA 60" "o_SNOVA 10" "l_SNOVA 4" "sk_is_seed 1" "PK_EXPAND_SHAKE 0"
 
 # MAYO opt variants select their parameter set from MAYO_VARIANT (CMake
-# -DMAYO_VARIANT=MAYO_N). Values mirror src/sig/mayo/CMakeLists.txt; MAYO-2 is
-# the only variant that omits HAVE_STACKEFFICIENT. MAYO angle-includes its own
-# variant-local headers, so localize_includes must run BEFORE generate_unity so
-# the merged unity TU can resolve them via quote includes.
-localize_includes "src/sig/mayo" "pqmayo_mayo-1_opt"
-localize_includes "src/sig/mayo" "pqmayo_mayo-2_opt"
-localize_includes "src/sig/mayo" "pqmayo_mayo-3_opt"
-localize_includes "src/sig/mayo" "pqmayo_mayo-5_opt"
-generate_unity "src/sig/mayo" "pqmayo_mayo-1_opt" "MAYO_VARIANT MAYO_1" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL" "HAVE_STACKEFFICIENT"
-generate_unity "src/sig/mayo" "pqmayo_mayo-2_opt" "MAYO_VARIANT MAYO_2" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL"
-generate_unity "src/sig/mayo" "pqmayo_mayo-3_opt" "MAYO_VARIANT MAYO_3" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL" "HAVE_STACKEFFICIENT"
-generate_unity "src/sig/mayo" "pqmayo_mayo-5_opt" "MAYO_VARIANT MAYO_5" "MAYO_BUILD_TYPE_OPT" "HAVE_RANDOMBYTES_NORETVAL" "HAVE_STACKEFFICIENT"
+# -DMAYO_VARIANT=MAYO_N). MAYO angle-includes its own variant-local headers
+# (mayo.h, api.h, params.h, ...) whose sizes differ per variant, so they cannot
+# share a flat include path. Rather than rewrite the upstream sources, each opt
+# variant is compiled as its own SPM sub-target (CliboqsMAYO{1,2,3,5} in
+# Package.swift) with its own directory on the header search path and the
+# per-variant -D parameter defines, leaving the upstream sources pristine.
 
 # UOV (oil-and-vinegar) variants select their param triple (_OVk_v_o), public-
 # key/secret-key compression mode (_OV_CLASSIC / _OV_PKC / _OV_PKC_SKC), and
