@@ -7,3 +7,9 @@ docs/
 graphy-out/
 Tests/OQSTests/UpstreamKATs/
 CLAUDE.local.md
+
+# Agent tooling / local-only
+.claude/
+.claire/
+skills-lock.json
+.agents/
