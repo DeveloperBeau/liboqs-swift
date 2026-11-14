@@ -23,7 +23,7 @@ jobs:
           - name: Windows
             runner: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: DeveloperBeau/resolve-swift@v2
         with:
           swift-version: '6.3'
@@ -47,7 +47,7 @@ jobs:
       matrix:
         shard: [0, 1, 2, 3]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: DeveloperBeau/resolve-swift@v2
         with:
           swift-version: '6.3'
@@ -62,7 +62,7 @@ jobs:
     name: Android
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: skiptools/swift-android-action@v2
         with:
           swift-version: '6.3'
