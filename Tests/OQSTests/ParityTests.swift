@@ -12,11 +12,14 @@ internal import Cliboqs
 /// call path from the raw `OQS_KEM_*`/`OQS_SIG_*` functions used here as the
 /// reference).
 ///
-/// KEMs compare pk/sk/ct/ss/ss2 (5 fields); signatures pk/sk/sig (3). Each
-/// algorithm additionally gets a SHA3-256 digest of its concatenated fields,
-/// checked against Vectors/parity_snapshot.txt — the full-coverage drift
-/// tripwire across vendored-liboqs bumps, frozen on macOS arm64 (the
-/// reference platform, matching ZigOQS).
+/// KEMs compare ct/pk/sk/ss/ss2 (5 fields); signatures pk/sig/sk (3). Each
+/// algorithm additionally gets a SHA-256 digest of its field bytes
+/// concatenated in field-name byte order. The snapshot is one `NAME digest`
+/// line per algorithm, sorted by name, the same file as the Rust and Zig
+/// ports. The whole file is compared byte for byte with
+/// Vectors/parity_snapshot.txt - the full-coverage drift tripwire across
+/// vendored-liboqs bumps, frozen on macOS arm64 (the reference platform).
+/// Sharded runs skip the whole-file comparison.
 ///
 /// Stateful signatures are excluded (large XMSS keygen runs for hours);
 /// KATTests anchors cover XMSS/LMS.
@@ -184,10 +187,8 @@ struct ParityTests {
             var fields = 0
 
             func compare(_ algo: String, _ raw: [(String, Data)], _ wrapped: [(String, Data)]) {
-                var blob = Data()
                 for ((field, r), (_, w)) in zip(raw, wrapped) {
                     fields += 1
-                    blob.append(w)
                     if r != w {
                         let detail = r.count != w.count
                             ? "length \(r.count) vs \(w.count)"
@@ -195,7 +196,7 @@ struct ParityTests {
                         mismatches.append("\(algo) \(field): \(detail)")
                     }
                 }
-                digests.append((algo, KAT.sha3_256Hex(blob)))
+                digests.append((algo, SnapshotFormat.digest(wrapped)))
             }
 
             for name in kems {
@@ -234,35 +235,33 @@ struct ParityTests {
                 Issue.record("refusing to write snapshot from a sharded run")
                 return
             }
-            let text = digests.map { "\($0.0) \($0.1)" }.joined(separator: "\n") + "\n"
+            let text = SnapshotFormat.text(digests)
             try text.write(toFile: snapshotSourcePath, atomically: true, encoding: .utf8)
             print("parity: wrote \(digests.count) digests to \(snapshotSourcePath)")
+            return
+        }
+
+        // A shard holds only part of the lines, so the whole-file check cannot run.
+        guard env["OQS_TOTAL"].flatMap({ Int($0) }) ?? 1 <= 1 else {
+            print("parity: sharded run, skipping whole-file snapshot comparison")
             return
         }
 
         // The snapshot is frozen on macOS arm64; other platforms validate
         // parity (self-consistent anywhere) but skip the drift check.
         #if !(os(macOS) && arch(arm64))
+        print("parity: not macOS arm64, skipping snapshot comparison")
         return
         #else
         guard let url = Bundle.module.url(forResource: "parity_snapshot", withExtension: "txt", subdirectory: "Vectors") else {
             Issue.record("parity_snapshot.txt missing from test bundle; regenerate with OQS_PARITY_WRITE_SNAPSHOT=1")
             return
         }
-        var expected: [String: String] = [:]
-        for line in try String(contentsOf: url, encoding: .utf8).split(separator: "\n") {
-            let parts = line.split(separator: " ")
-            if parts.count == 2 { expected[String(parts[0])] = String(parts[1]) }
-        }
-        for (algo, digest) in digests {
-            switch expected[algo] {
-            case nil:
-                Issue.record("snapshot missing algorithm \(algo); regenerate with OQS_PARITY_WRITE_SNAPSHOT=1")
-            case digest:
-                break
-            default:
-                Issue.record("snapshot drift: \(algo) digest changed")
-            }
+        let expected = try String(contentsOf: url, encoding: .utf8)
+        let actual = SnapshotFormat.text(digests)
+        if actual != expected {
+            let diffs = SnapshotFormat.differences(expected: expected, actual: actual)
+            Issue.record("snapshot drift (regenerate with OQS_PARITY_WRITE_SNAPSHOT=1): \(diffs.isEmpty ? "formatting differs" : diffs.joined(separator: ", "))")
         }
         #endif
     }
