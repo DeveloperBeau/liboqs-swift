@@ -32,6 +32,15 @@ enum KAT {
         _ = OQS_randombytes_switch_algorithm("system")
     }
 
+    /// SHA-256 hex digest of `data` (uses liboqs `OQS_SHA2_sha256`).
+    static func sha256Hex(_ data: Data) -> String {
+        var out = [UInt8](repeating: 0, count: 32)
+        data.withUnsafeBytes { inBuf in
+            OQS_SHA2_sha256(&out, inBuf.baseAddress?.assumingMemoryBound(to: UInt8.self), inBuf.count)
+        }
+        return out.map { String(format: "%02x", $0) }.joined()
+    }
+
     /// SHA3-256 hex digest of `data` (uses liboqs `OQS_SHA3_sha3_256`).
     static func sha3_256Hex(_ data: Data) -> String {
         var out = [UInt8](repeating: 0, count: 32)

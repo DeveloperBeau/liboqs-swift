@@ -4,7 +4,7 @@ import Foundation
 internal import Cliboqs
 
 /// Differential parity: every enabled liboqs algorithm, every output buffer,
-/// raw C API vs the Swift FFI layer, byte-identical under the deterministic
+/// raw C API vs the public Swift types, byte-identical under the deterministic
 /// NIST-KAT seed. This is ZigOQS's cref/zref design collapsed into one
 /// process: both sides link the same vendored library, so the comparison
 /// isolates the Swift wrapper layer (Data bridging, length handling, and the
@@ -12,14 +12,24 @@ internal import Cliboqs
 /// call path from the raw `OQS_KEM_*`/`OQS_SIG_*` functions used here as the
 /// reference).
 ///
-/// KEMs compare pk/sk/ct/ss/ss2 (5 fields); signatures pk/sk/sig (3). Each
-/// algorithm additionally gets a SHA3-256 digest of its concatenated fields,
-/// checked against Vectors/parity_snapshot.txt — the full-coverage drift
-/// tripwire across vendored-liboqs bumps, frozen on macOS arm64 (the
-/// reference platform, matching ZigOQS).
+/// The Swift side runs each algorithm through the public type a caller uses
+/// (for example `MLKEM512.PrivateKey()`, `generateSharedSecret()` and
+/// `decryptSharedSecret(_:)`, or `SLHDSA.Prehash.PrivateKey` for the
+/// parameterized pre-hash set). ParityRegistry maps each liboqs name to its
+/// type, and ParityRegistryTests proves that no enabled name is missing.
 ///
-/// Stateful signatures are excluded (large XMSS keygen runs for hours);
-/// KATTests anchors cover XMSS/LMS.
+/// KEMs compare ct/pk/sk/ss/ss2 (5 fields); signatures pk/sig/sk (3). Each
+/// algorithm additionally gets a SHA-256 digest of its field bytes
+/// concatenated in field-name byte order. The snapshot is one `NAME digest`
+/// line per algorithm, sorted by name, the same file as the Rust and Zig
+/// ports. The whole file is compared byte for byte with
+/// Vectors/parity_snapshot.txt - the full-coverage drift tripwire across
+/// vendored-liboqs bumps, frozen on macOS arm64 (the reference platform).
+/// Sharded runs skip the whole-file comparison.
+///
+/// Stateful signatures are not part of this suite or of the snapshot (large
+/// XMSS keygen runs for hours). StatefulParityTests compares XMSS, XMSS^MT and
+/// LMS on their own, outside the snapshot; KATTests anchors also cover them.
 ///
 /// The full set takes minutes (Classic McEliece keygen and the 144 SLH-DSA
 /// prehash signs dominate), so the suite is opt-in:
@@ -81,7 +91,7 @@ struct ParityTests {
         return [("pk", pk), ("sk", sk), ("ct", ct), ("ss", ss), ("ss2", ss2)]
     }
 
-    private static let message = Data("the quick brown fox".utf8)
+    private static let message = ParityRegistry.message
 
     private static func rawSig(_ name: String) throws -> [(String, Data)] {
         guard let sig = OQS_SIG_new(name) else { throw OQSError.algorithmNotAvailable(name) }
@@ -118,42 +128,7 @@ struct ParityTests {
         return [("pk", pk), ("sk", sk), ("sig", sg)]
     }
 
-    // MARK: - Swift wrapper side (the layer under test)
-
-    private static func wrapperKEM(_ name: String) throws -> [(String, Data)] {
-        KAT.seedDeterministicRNG()
-        let kp = try kemGenerateKeyPair(algorithm: name)
-        KAT.seedDeterministicRNG()
-        let enc = try kemEncapsulate(algorithm: name, publicKey: kp.publicKey)
-        let ss2 = try kemDecapsulate(algorithm: name, ciphertext: enc.ciphertext, secretKey: kp.secretKey)
-        return [("pk", kp.publicKey), ("sk", kp.secretKey), ("ct", enc.ciphertext), ("ss", enc.sharedSecret), ("ss2", ss2)]
-    }
-
-    private static func wrapperSig(_ name: String) throws -> [(String, Data)] {
-        KAT.seedDeterministicRNG()
-        let kp = try sigGenerateKeyPair(algorithm: name)
-        KAT.seedDeterministicRNG()
-        let sg = try sigSign(algorithm: name, message: message, secretKey: kp.secretKey)
-        return [("pk", kp.publicKey), ("sk", kp.secretKey), ("sig", sg)]
-    }
-
-    // MARK: - Enumeration and sharding
-
-    private static func enabledAlgorithms() -> (kems: [String], sigs: [String]) {
-        var kems: [String] = []
-        for i in 0..<OQS_KEM_alg_count() {
-            guard let id = OQS_KEM_alg_identifier(Int(i)) else { continue }
-            let name = String(cString: id)
-            if OQS_KEM_alg_is_enabled(name) == 1 { kems.append(name) }
-        }
-        var sigs: [String] = []
-        for i in 0..<OQS_SIG_alg_count() {
-            guard let id = OQS_SIG_alg_identifier(Int(i)) else { continue }
-            let name = String(cString: id)
-            if OQS_SIG_alg_is_enabled(name) == 1 { sigs.append(name) }
-        }
-        return (kems, sigs)
-    }
+    // MARK: - Sharding
 
     private static func shardFilter<T>(_ items: [T], offset: Int) -> [T] {
         let env = ProcessInfo.processInfo.environment
@@ -167,9 +142,14 @@ struct ParityTests {
     @Test("Every algorithm: raw C and Swift wrapper outputs are byte-identical")
     func parity() throws {
         defer { KAT.restoreSystemRNG() }
-        let (allKEMs, allSigs) = Self.enabledAlgorithms()
+        let (allKEMs, allSigs) = ParityRegistry.enabledNames()
         let kems = Self.shardFilter(allKEMs, offset: 0)
         let sigs = Self.shardFilter(allSigs, offset: allKEMs.count)
+        // The wrapper side runs through the public Swift types. A name with no
+        // entry fails the run; ParityRegistryTests reports the full gap.
+        let wrappers = Dictionary(
+            (ParityRegistry.kems() + ParityRegistry.sigs()).map { ($0.name, $0) },
+            uniquingKeysWith: { first, _ in first })
 
         struct Mismatch: CustomStringConvertible {
             let algo: String, field: String, detail: String
@@ -184,10 +164,8 @@ struct ParityTests {
             var fields = 0
 
             func compare(_ algo: String, _ raw: [(String, Data)], _ wrapped: [(String, Data)]) {
-                var blob = Data()
                 for ((field, r), (_, w)) in zip(raw, wrapped) {
                     fields += 1
-                    blob.append(w)
                     if r != w {
                         let detail = r.count != w.count
                             ? "length \(r.count) vs \(w.count)"
@@ -195,16 +173,21 @@ struct ParityTests {
                         mismatches.append("\(algo) \(field): \(detail)")
                     }
                 }
-                digests.append((algo, KAT.sha3_256Hex(blob)))
+                digests.append((algo, SnapshotFormat.digest(wrapped)))
+            }
+
+            func wrapped(_ name: String) throws -> [(String, Data)] {
+                guard let algo = wrappers[name] else { throw OQSError.algorithmNotAvailable(name) }
+                return try algo.run()
             }
 
             for name in kems {
                 print("  parity kem \(name)")
-                compare(name, try Self.rawKEM(name), try Self.wrapperKEM(name))
+                compare(name, try Self.rawKEM(name), try wrapped(name))
             }
             for name in sigs {
                 print("  parity sig \(name)")
-                compare(name, try Self.rawSig(name), try Self.wrapperSig(name))
+                compare(name, try Self.rawSig(name), try wrapped(name))
             }
             return (mismatches, digests, fields)
         }
@@ -234,35 +217,33 @@ struct ParityTests {
                 Issue.record("refusing to write snapshot from a sharded run")
                 return
             }
-            let text = digests.map { "\($0.0) \($0.1)" }.joined(separator: "\n") + "\n"
+            let text = SnapshotFormat.text(digests)
             try text.write(toFile: snapshotSourcePath, atomically: true, encoding: .utf8)
             print("parity: wrote \(digests.count) digests to \(snapshotSourcePath)")
+            return
+        }
+
+        // A shard holds only part of the lines, so the whole-file check cannot run.
+        guard env["OQS_TOTAL"].flatMap({ Int($0) }) ?? 1 <= 1 else {
+            print("parity: sharded run, skipping whole-file snapshot comparison")
             return
         }
 
         // The snapshot is frozen on macOS arm64; other platforms validate
         // parity (self-consistent anywhere) but skip the drift check.
         #if !(os(macOS) && arch(arm64))
+        print("parity: not macOS arm64, skipping snapshot comparison")
         return
         #else
         guard let url = Bundle.module.url(forResource: "parity_snapshot", withExtension: "txt", subdirectory: "Vectors") else {
             Issue.record("parity_snapshot.txt missing from test bundle; regenerate with OQS_PARITY_WRITE_SNAPSHOT=1")
             return
         }
-        var expected: [String: String] = [:]
-        for line in try String(contentsOf: url, encoding: .utf8).split(separator: "\n") {
-            let parts = line.split(separator: " ")
-            if parts.count == 2 { expected[String(parts[0])] = String(parts[1]) }
-        }
-        for (algo, digest) in digests {
-            switch expected[algo] {
-            case nil:
-                Issue.record("snapshot missing algorithm \(algo); regenerate with OQS_PARITY_WRITE_SNAPSHOT=1")
-            case digest:
-                break
-            default:
-                Issue.record("snapshot drift: \(algo) digest changed")
-            }
+        let expected = try String(contentsOf: url, encoding: .utf8)
+        let actual = SnapshotFormat.text(digests)
+        if actual != expected {
+            let diffs = SnapshotFormat.differences(expected: expected, actual: actual)
+            Issue.record("snapshot drift (regenerate with OQS_PARITY_WRITE_SNAPSHOT=1): \(diffs.isEmpty ? "formatting differs" : diffs.joined(separator: ", "))")
         }
         #endif
     }
