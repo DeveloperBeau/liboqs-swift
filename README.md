@@ -46,7 +46,7 @@ That's what this library does. The KEM replaces the old Diffie-Hellman key excha
 
 ## Requirements
 
-- Swift 6.3+
+- Swift 6.4+
 - macOS 13+ / iOS 16+ / tvOS 16+ / watchOS 9+ / Linux / Windows / Android
 
 ## Installation
