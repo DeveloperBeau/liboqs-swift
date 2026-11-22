@@ -365,15 +365,7 @@ import Foundation
 
     @Test("All OQSError cases produce non-empty descriptions")
     func errorDescriptionsNonEmpty() {
-        let cases: [OQSError] = [
-            .algorithmNotAvailable("test"),
-            .keyGenerationFailed,
-            .encapsulationFailed,
-            .decapsulationFailed,
-            .signFailed,
-            .verifyFailed,
-            .invalidKeySize(expected: 32, actual: 16),
-        ]
+        let cases = OQSErrorTests.oneOfEachCase
         for error in cases {
             #expect(!error.description.isEmpty)
         }
