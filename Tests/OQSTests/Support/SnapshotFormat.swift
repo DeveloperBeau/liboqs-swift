@@ -20,10 +20,16 @@ enum SnapshotFormat {
         digests.sorted(by: { byteLess($0.0, $1.0) }).map { "\($0.0) \($0.1)\n" }.joined()
     }
 
+    /// Converts CRLF and lone CR line endings to LF. Swift treats "\r\n" as one
+    /// Character, so CRLF checkouts (Windows) must be normalized before splitting.
+    static func normalizeNewlines(_ text: String) -> String {
+        text.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+    }
+
     /// Parses snapshot text into name-to-digest pairs (blank lines ignored).
     static func parse(_ text: String) -> [String: String] {
         var table: [String: String] = [:]
-        for line in text.split(separator: "\n") {
+        for line in normalizeNewlines(text).split(separator: "\n") {
             let parts = line.split(separator: " ")
             if parts.count == 2 { table[String(parts[0])] = String(parts[1]) }
         }

@@ -1,0 +1,2 @@
+# Frozen vectors must stay LF on every checkout (Windows would otherwise convert to CRLF).
+Tests/OQSTests/Vectors/** text eol=lf

@@ -235,11 +235,11 @@ struct ParityTests {
         print("parity: not macOS arm64, skipping snapshot comparison")
         return
         #else
-        guard let url = Bundle.module.url(forResource: "parity_snapshot", withExtension: "txt", subdirectory: "Vectors") else {
+        guard let url = TestVectors.url("parity_snapshot", "txt") else {
             Issue.record("parity_snapshot.txt missing from test bundle; regenerate with OQS_PARITY_WRITE_SNAPSHOT=1")
             return
         }
-        let expected = try String(contentsOf: url, encoding: .utf8)
+        let expected = SnapshotFormat.normalizeNewlines(try String(contentsOf: url, encoding: .utf8))
         let actual = SnapshotFormat.text(digests)
         if actual != expected {
             let diffs = SnapshotFormat.differences(expected: expected, actual: actual)
