@@ -56,7 +56,7 @@ struct KATHashes {
     private let table: [String: String]
 
     private init() {
-        guard let url = Bundle.module.url(forResource: "kat_hashes", withExtension: "json", subdirectory: "Vectors") else {
+        guard let url = TestVectors.url("kat_hashes", "json") else {
             fatalError("kat_hashes.json missing from test bundle (expected in Vectors/)")
         }
         do {

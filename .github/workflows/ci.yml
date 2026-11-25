@@ -74,3 +74,6 @@ jobs:
           # parallel, which would race the global RNG and flake. KAT determinism
           # is validated on the macOS/Linux build job.
           swift-test-flags: '--skip KATTests'
+          # Copy the frozen vectors into the emulator pack dir; the action only
+          # copies *.resources, which does not include the test resource bundle.
+          copy-files: Tests/OQSTests/Vectors

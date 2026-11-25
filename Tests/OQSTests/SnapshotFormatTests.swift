@@ -24,8 +24,8 @@ struct SnapshotFormatTests {
 
     @Test("Frozen snapshot file is well formed")
     func frozenFile() throws {
-        let url = try #require(Bundle.module.url(forResource: "parity_snapshot", withExtension: "txt", subdirectory: "Vectors"))
-        let text = try String(contentsOf: url, encoding: .utf8)
+        let url = try #require(TestVectors.url("parity_snapshot", "txt"))
+        let text = SnapshotFormat.normalizeNewlines(try String(contentsOf: url, encoding: .utf8))
         #expect(text.hasSuffix("\n"))
         let lines = text.dropLast().split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
         #expect(lines.count == 262)
