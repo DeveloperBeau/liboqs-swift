@@ -41,4 +41,16 @@ struct SnapshotFormatTests {
             #expect(a.utf8.lexicographicallyPrecedes(b.utf8), "not sorted or duplicate: \(a), \(b)")
         }
     }
+
+    @Test("normalizeNewlines converts CRLF, lone CR and mixed endings to LF")
+    func normalizeNewlinesConvertsCRLFAndLoneCR() {
+        #expect(SnapshotFormat.normalizeNewlines("A 1\r\nB 2\r\n") == "A 1\nB 2\n")
+        #expect(SnapshotFormat.normalizeNewlines("A 1\rB 2\r") == "A 1\nB 2\n")
+        #expect(SnapshotFormat.normalizeNewlines("A 1\r\nB 2\rC 3\n") == "A 1\nB 2\nC 3\n")
+    }
+
+    @Test("parse reads CRLF-terminated snapshot text")
+    func parseHandlesCRLFText() {
+        #expect(SnapshotFormat.parse("A aa\r\nB bb\r\n") == ["A": "aa", "B": "bb"])
+    }
 }
