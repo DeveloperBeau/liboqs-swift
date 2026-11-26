@@ -32,13 +32,38 @@ import Foundation
         try String(contentsOf: moduleRoot.appendingPathComponent(file), encoding: .utf8)
     }
 
+    /// The imports of `source` that `file` is not allowed. The LF and CRLF tests share this.
+    private static func outwardImports(of file: String, in source: String) throws -> [String] {
+        let allowed = try #require(entities.first { $0.file == file }).allowed
+        return SwiftImportScanner.importedModules(in: source).filter { !allowed.contains($0) }
+    }
+
+    private static func crlf(_ source: String) -> String {
+        source.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\n", with: "\r\n")
+    }
+
     @Test("Every entity file imports only the modules it is allowed, and the description types import nothing",
           arguments: entities.map(\.file))
     func entityImportsStayInward(file: String) throws {
-        let allowed = try #require(Self.entities.first { $0.file == file }).allowed
-        let imported = SwiftImportScanner.importedModules(in: try Self.source(file))
-        let outward = imported.filter { !allowed.contains($0) }
+        let outward = try Self.outwardImports(of: file, in: try Self.source(file))
         #expect(outward.isEmpty, "\(file) imports \(outward), which is outside the entities ring")
+    }
+
+    @Test("The same check passes on a CRLF copy of every entity file, as on a Windows checkout",
+          arguments: entities.map(\.file))
+    func entityImportsStayInwardWithCRLF(file: String) throws {
+        let source = Self.crlf(try Self.source(file))
+        #expect(source.contains("\r\n"))
+        let outward = try Self.outwardImports(of: file, in: source)
+        #expect(outward.isEmpty, "\(file) with CRLF imports \(outward), which is outside the entities ring")
+    }
+
+    @Test("The check still flags an outward import added to a CRLF copy of every entity file",
+          arguments: entities.map(\.file))
+    func crlfCheckFlagsAnOutwardImport(file: String) throws {
+        let source = "import Cliboqs\r\n" + Self.crlf(try Self.source(file))
+        let outward = try Self.outwardImports(of: file, in: source)
+        #expect(outward == ["Cliboqs"], "\(file) with CRLF gave \(outward)")
     }
 
     @Test("Every Swift file in SharedTypes and every Description type file in the module is on the entity list")
@@ -71,6 +96,21 @@ import Foundation
         #expect(SwiftImportScanner.importedModules(in: "/// import Cliboqs\n// import Cliboqs") == [])
         #expect(SwiftImportScanner.importedModules(in: "let importance = 1\nfunc imports() {}\n#if canImport(Cliboqs)") == [])
         #expect(SwiftImportScanner.importedModules(in: "public struct X {}") == [])
+    }
+
+    @Test("The import scan reads CRLF and lone CR line ends like LF, with no line end left in a name")
+    func scannerReadsEveryNewline() {
+        let sources = [
+            "import Foundation\r\n": ["Foundation"],
+            "import Foundation\r\nimport Cliboqs\r\n": ["Foundation", "Cliboqs"],
+            "import Foundation\rimport Cliboqs\r": ["Foundation", "Cliboqs"],
+            "import Foundation\r\n\r\n// import Dispatch\r\n": ["Foundation"],
+        ]
+        for (source, expected) in sources {
+            let modules = SwiftImportScanner.importedModules(in: source)
+            #expect(modules == expected, "\(source.debugDescription) gave \(modules)")
+            #expect(modules.allSatisfy { !$0.contains("\r") && !$0.contains("\n") })
+        }
     }
 
     @Test("The import check flags a description file that imports Cliboqs")

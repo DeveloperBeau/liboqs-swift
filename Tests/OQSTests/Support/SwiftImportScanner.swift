@@ -1,7 +1,10 @@
+import Foundation
+
 /// Finds the modules a Swift source file imports.
 ///
-/// It reads each line, drops a `//` comment, and looks for an `import`
-/// keyword after any attributes (`@testable`, `@_implementationOnly`,
+/// It splits the source on any newline (`\n`, `\r\n` or a lone `\r`), so a
+/// CRLF checkout reads the same as an LF one. It reads each line, drops a `//`
+/// comment, and looks for an `import` keyword after any attributes (`@testable`, `@_implementationOnly`,
 /// `@preconcurrency`) and access level (`public`, `internal` and the others).
 /// An import of one declaration (`import struct M.T`) counts as an import of
 /// its module `M`. Several statements on one line, split by semicolons, are each
@@ -14,7 +17,7 @@ enum SwiftImportScanner {
     /// The imported module names of `source`, in the order they appear.
     static func importedModules(in source: String) -> [String] {
         var modules: [String] = []
-        for rawLine in source.split(separator: "\n", omittingEmptySubsequences: false) {
+        for rawLine in source.split(omittingEmptySubsequences: false, whereSeparator: \.isNewline) {
             var line = Substring(rawLine)
             if let comment = line.range(of: "//") { line = line[..<comment.lowerBound] }
             for statement in line.split(separator: ";") {
@@ -33,6 +36,6 @@ enum SwiftImportScanner {
         tokens = tokens.dropFirst()
         if let kind = tokens.first, declarationKinds.contains(String(kind)) { tokens = tokens.dropFirst() }
         guard let path = tokens.first else { return nil }
-        return String(path.split(separator: ".").first ?? path)
+        return String(path.split(separator: ".").first ?? path).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
