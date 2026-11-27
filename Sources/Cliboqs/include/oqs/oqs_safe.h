@@ -105,6 +105,31 @@ static inline OQS_STATUS oqs_sig_verify_safe(
     return OQS_SIG_verify(sig, message, message_len, signature, signature_len, public_key);
 }
 
+/* The context string is optional. An empty context is passed as NULL with
+ * length 0, so `ctx_str` uses `__sized_by_or_null` and stays nullable in the
+ * synthesized Swift overload. */
+static inline OQS_STATUS oqs_sig_sign_with_ctx_str_safe(
+        const OQS_SIG *sig,
+        uint8_t *signature __sized_by(sig_buf_len), size_t sig_buf_len,
+        size_t *signature_len,
+        const uint8_t *message __sized_by(message_len), size_t message_len,
+        const uint8_t *_Nullable ctx_str __sized_by_or_null(ctx_str_len), size_t ctx_str_len,
+        const uint8_t *secret_key __sized_by(sk_len), size_t sk_len) {
+    (void)sig_buf_len;
+    (void)sk_len;
+    return OQS_SIG_sign_with_ctx_str(sig, signature, signature_len, message, message_len, ctx_str, ctx_str_len, secret_key);
+}
+
+static inline OQS_STATUS oqs_sig_verify_with_ctx_str_safe(
+        const OQS_SIG *sig,
+        const uint8_t *message __sized_by(message_len), size_t message_len,
+        const uint8_t *signature __sized_by(signature_len), size_t signature_len,
+        const uint8_t *_Nullable ctx_str __sized_by_or_null(ctx_str_len), size_t ctx_str_len,
+        const uint8_t *public_key __sized_by(pk_len), size_t pk_len) {
+    (void)pk_len;
+    return OQS_SIG_verify_with_ctx_str(sig, message, message_len, signature, signature_len, ctx_str, ctx_str_len, public_key);
+}
+
 /* ---- SIG_STFL (stateful) --------------------------------------------- */
 
 /* The secret-key object and store callback are opaque/pointers — left alone.
