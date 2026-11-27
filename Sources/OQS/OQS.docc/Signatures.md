@@ -17,6 +17,17 @@ let signature = try signingKey.signature(for: messageData)
 let valid = try signingKey.publicKey.isValidSignature(signature, for: messageData)
 ```
 
+### Context strings
+
+ML-DSA and SLH-DSA keys can sign and verify with a context string of up to 255 bytes:
+
+```swift
+let signature = try signingKey.signature(for: messageData, context: contextData)
+let valid = try signingKey.publicKey.isValidSignature(signature, for: messageData, context: contextData)
+```
+
+An empty context gives the same result as the calls without a context. Signing with a non-empty context on an algorithm that takes none throws ``OQSError/contextNotSupported``, and a context over 255 bytes throws ``OQSError/contextTooLong``. Verifying returns `false` in both cases. To check whether an algorithm takes a context, read ``Registry/signatureDescription(named:)`` and its `supportsContext` value.
+
 ## Topics
 
 ### ML-DSA (FIPS 204)

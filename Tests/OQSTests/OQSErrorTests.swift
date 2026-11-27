@@ -220,7 +220,7 @@ import Foundation
 }
 
 /// Small seeded generator so a fuzz failure can be replayed from the printed seed.
-private struct SplitMix64 {
+struct SplitMix64 {
     var state: UInt64
     init(seed: UInt64) { state = seed }
     mutating func next() -> UInt64 {

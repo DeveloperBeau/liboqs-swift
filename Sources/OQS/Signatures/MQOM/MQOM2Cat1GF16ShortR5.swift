@@ -63,6 +63,18 @@ public enum MQOM2Cat1GF16ShortR5: Sendable {
         public func signature(for data: Data) throws -> Data {
             try sigSign(algorithm: MQOM2Cat1GF16ShortR5.algorithmName, message: data, secretKey: rawRepresentation)
         }
+
+        /// Signs `data` together with a context string.
+        ///
+        /// An empty `context` gives the same signature as ``signature(for:)``.
+        /// The context is at most 255 bytes. Throws ``OQSError/contextNotSupported``
+        /// when the algorithm takes no context and `context` is not empty,
+        /// ``OQSError/invalidKeySize(expected:actual:)`` when the secret key has the
+        /// wrong length, ``OQSError/contextTooLong`` when `context` is over 255 bytes,
+        /// and ``OQSError/signFailed`` when liboqs reports an error.
+        public func signature(for data: Data, context: Data) throws -> Data {
+            try sigSign(algorithm: MQOM2Cat1GF16ShortR5.algorithmName, message: data, context: context, secretKey: rawRepresentation)
+        }
     }
 
     public struct PublicKey: Sendable {
@@ -82,6 +94,17 @@ public enum MQOM2Cat1GF16ShortR5: Sendable {
 
         public func isValidSignature(_ signature: Data, for data: Data) throws -> Bool {
             try sigVerify(algorithm: MQOM2Cat1GF16ShortR5.algorithmName, message: data, signature: signature, publicKey: rawRepresentation)
+        }
+
+        /// Verifies `signature` over `data` and a context string.
+        ///
+        /// An empty `context` gives the same result as ``isValidSignature(_:for:)``.
+        /// Returns `false` when the signature does not match, when the algorithm takes
+        /// no context and `context` is not empty, and when `context` is over 255 bytes.
+        /// Throws ``OQSError/invalidKeySize(expected:actual:)`` when the public key has
+        /// the wrong length.
+        public func isValidSignature(_ signature: Data, for data: Data, context: Data) throws -> Bool {
+            try sigVerify(algorithm: MQOM2Cat1GF16ShortR5.algorithmName, message: data, signature: signature, context: context, publicKey: rawRepresentation)
         }
     }
 }

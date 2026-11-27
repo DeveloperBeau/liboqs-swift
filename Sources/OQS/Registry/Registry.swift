@@ -103,7 +103,7 @@ public enum Registry {
             claimedNISTLevel: Int(s.claimed_nist_level),
             isEUFCMASecure: s.euf_cma,
             isSUFCMASecure: s.suf_cma,
-            supportsContext: s.sig_with_ctx_support,
+            supportsContext: sigSupportsContext(sig),
             publicKeyLength: Int(s.length_public_key),
             secretKeyLength: Int(s.length_secret_key),
             signatureLength: Int(s.length_signature))
