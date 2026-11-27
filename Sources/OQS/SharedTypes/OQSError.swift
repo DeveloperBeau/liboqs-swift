@@ -23,6 +23,9 @@ public enum OQSError: Error, Sendable, Equatable, Hashable, CustomStringConverti
     /// The context string is longer than the algorithm allows.
     case contextTooLong
     /// The algorithm has no form of the operation that takes a seed.
+    ///
+    /// The seeded ML-KEM key pair and shared secret methods never throw this.
+    /// It is thrown for any other KEM, which has no seeded form in liboqs.
     case seedNotSupported
     /// The stateful secret key has no signature left to give.
     case keyExhausted
