@@ -100,6 +100,28 @@ let signature = try signingKey.signature(for: message)
 let valid = try signingKey.publicKey.isValidSignature(signature, for: message)
 ```
 
+### Algorithm lookup
+
+`Registry` lists the algorithms this build enables and reports what liboqs knows about each one. The lists are in liboqs order. A lookup ignores the case of ASCII letters, as liboqs does, and the description always carries the liboqs name.
+
+```swift
+import OQS
+
+print(Registry.enabledKEMNames.count)               // 41
+print(Registry.isSignatureEnabled("ml-dsa-65"))     // true
+
+if let kem = Registry.kemDescription(named: "ml-kem-768") {
+    print(kem.name)                // ML-KEM-768
+    print(kem.claimedNISTLevel)    // 3
+    print(kem.ciphertextLength)    // 1088
+}
+
+let lms = Registry.statefulSignatureDescription(named: "LMS_SHA256_H5_W8")
+print(lms?.signatureLength ?? 0)   // 1296
+```
+
+A name that is not enabled gives `nil` and `false`. The values come from the vendored liboqs, which is still pinned at 0.16.0.
+
 ## Algorithms
 
 Every liboqs 0.16.0 algorithm has its own Swift type with a `PrivateKey` and `PublicKey`.

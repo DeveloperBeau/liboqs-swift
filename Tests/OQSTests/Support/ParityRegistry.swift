@@ -1,6 +1,5 @@
 import Foundation
 @testable import OQS
-internal import Cliboqs
 
 /// Maps every liboqs KEM and stateless signature name to a closure that runs
 /// the base case through the algorithm's public Swift type, the way a caller
@@ -12,26 +11,14 @@ enum ParityRegistry {
 
     /// Every enabled liboqs KEM and stateless signature name, in liboqs order.
     static func enabledNames() -> (kems: [String], sigs: [String]) {
-        var kems: [String] = []
-        for i in 0..<OQS_KEM_alg_count() {
-            guard let id = OQS_KEM_alg_identifier(Int(i)) else { continue }
-            let name = String(cString: id)
-            if OQS_KEM_alg_is_enabled(name) == 1 { kems.append(name) }
-        }
-        var sigs: [String] = []
-        for i in 0..<OQS_SIG_alg_count() {
-            guard let id = OQS_SIG_alg_identifier(Int(i)) else { continue }
-            let name = String(cString: id)
-            if OQS_SIG_alg_is_enabled(name) == 1 { sigs.append(name) }
-        }
-        return (kems, sigs)
+        (Registry.enabledKEMNames, Registry.enabledSignatureNames)
     }
 
     // KEM base case: keygen, reseed, encapsulate, decapsulate.
     private static func kem<K: ParityKEMPrivateKey>(
         _ name: String, _ make: @escaping @Sendable () throws -> K
     ) -> ParityAlgorithm {
-        ParityAlgorithm(name: name) {
+        ParityAlgorithm(name: name, run: {
             KAT.seedDeterministicRNG()
             let key = try make()
             KAT.seedDeterministicRNG()
@@ -42,20 +29,27 @@ enum ParityRegistry {
                 ("ct", enc.ciphertext), ("ss", enc.sharedSecret.rawRepresentation),
                 ("ss2", ss2.rawRepresentation),
             ]
-        }
+        }, typedLengths: { try TypedLengths.kem(K.self) })
     }
 
     // Signature base case: keygen, reseed, sign `message`.
     private static func sig<K: ParitySigPrivateKey>(
-        _ name: String, _ make: @escaping @Sendable () throws -> K
+        _ name: String, _ make: @escaping @Sendable () throws -> K,
+        typedLengths: @escaping @Sendable () throws -> TypedLengths
     ) -> ParityAlgorithm {
-        ParityAlgorithm(name: name) {
+        ParityAlgorithm(name: name, run: {
             KAT.seedDeterministicRNG()
             let key = try make()
             KAT.seedDeterministicRNG()
             let sg = try key.signature(for: message)
             return [("pk", key.publicKey.rawRepresentation), ("sk", key.rawRepresentation), ("sig", sg)]
-        }
+        }, typedLengths: typedLengths)
+    }
+
+    private static func sig<K: ParityImportableSigPrivateKey>(
+        _ name: String, _ make: @escaping @Sendable () throws -> K
+    ) -> ParityAlgorithm {
+        sig(name, make, typedLengths: { try TypedLengths.signature(K.self, name: name) })
     }
 
     static func kems() -> [ParityAlgorithm] {
@@ -108,9 +102,10 @@ enum ParityRegistry {
         // SLH-DSA pre-hash is parameterized: 12 functions x 12 parameter sets.
         let prehash = SLHDSA.Prehash.Function.allCases.flatMap { fn in
             SLHDSA.Prehash.ParamSet.allCases.map { ps in
-                sig(SLHDSA.Prehash.algorithmName(fn, ps)) {
-                    try SLHDSA.Prehash.PrivateKey(prehash: fn, paramSet: ps)
-                }
+                sig(
+                    SLHDSA.Prehash.algorithmName(fn, ps),
+                    { try SLHDSA.Prehash.PrivateKey(prehash: fn, paramSet: ps) },
+                    typedLengths: { try TypedLengths.prehash(fn, ps) })
             }
         }
         return prehash + [
