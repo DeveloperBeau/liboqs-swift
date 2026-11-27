@@ -128,6 +128,16 @@ Stateful schemes (XMSS, XMSS^MT, LMS) consume a one-time key index on every
 signature; reusing an index breaks security. Their `PrivateKey` is a reference
 type that owns mutable key state. Signing takes a persist closure and hands
 back a signature only once that closure has durably stored the advanced state.
+If the closure throws, signing throws ``OQSError/persistenceFailed`` and returns
+no signature.
+
+`totalSignatures` is `2^h - 1` and does not drop. `remainingSignatures` drops by
+one per signature. If liboqs cannot read the key, both throw
+``OQSError/invalidKeySize(expected:actual:)``. One key makes `totalSignatures` + 1
+signatures, and the last is made when `remainingSignatures` reads 0. After that,
+an LMS key throws ``OQSError/keyExhausted`` and an XMSS key throws
+``OQSError/signFailed``. The extra XMSS signature does not verify.
+
 See each type's docs for the full pattern and the keygen-cost warnings on large
 parameter sets.
 

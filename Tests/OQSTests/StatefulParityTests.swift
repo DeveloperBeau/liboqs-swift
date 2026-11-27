@@ -8,7 +8,7 @@ internal import Cliboqs
 /// and `LMS` types, under the deterministic NIST-KAT seed.
 ///
 /// Compared per algorithm: public key, the C-format secret key after one sign,
-/// and the signature. The public types expose the secret key as a blob of
+/// the signature, and the remaining and total signature counts after that sign. The public types expose the secret key as a blob of
 /// `publicKey || liboqs-secret-key`, so the test drops the public-key prefix
 /// before it compares with the C secret key. The signature must also verify
 /// through the public type.
@@ -47,7 +47,7 @@ struct StatefulParityTests {
     // MARK: - Raw C reference side
 
     private struct Outputs: Sendable {
-        let pk: Data, sk: Data, sig: Data
+        let pk: Data, sk: Data, sig: Data, remaining: UInt64, total: UInt64
     }
 
     private static func raw(_ name: String) throws -> Outputs {
@@ -82,13 +82,20 @@ struct StatefulParityTests {
         guard rc == OQS_SUCCESS else { throw OQSError.signFailed }
         sg.removeSubrange(sgLen...)
 
+        var remaining: UInt64 = 0
+        var total: UInt64 = 0
+        guard OQS_SIG_STFL_sigs_remaining(sig, &remaining, key) == OQS_SUCCESS,
+              OQS_SIG_STFL_sigs_total(sig, &total, key) == OQS_SUCCESS else {
+            throw OQSError.invalidKeySize(expected: 0, actual: 0)
+        }
+
         var buf: UnsafeMutablePointer<UInt8>?
         var bufLen = 0
         guard OQS_SIG_STFL_SECRET_KEY_serialize(&buf, &bufLen, key) == OQS_SUCCESS, let buf else {
             throw OQSError.keyGenerationFailed
         }
         defer { OQS_MEM_secure_free(buf, bufLen) }
-        return Outputs(pk: pk, sk: Data(bytes: buf, count: bufLen), sig: sg)
+        return Outputs(pk: pk, sk: Data(bytes: buf, count: bufLen), sig: sg, remaining: remaining, total: total)
     }
 
     // MARK: - Public type side
@@ -101,6 +108,8 @@ struct StatefulParityTests {
         let blob: Data
         let sig: Data
         let verified: Bool
+        let remaining: UInt64
+        let total: UInt64
         if let v = XMSSMT.Variant(rawValue: name) {
             let key = try XMSSMT.PrivateKey(v)
             KAT.seedDeterministicRNG()
@@ -108,6 +117,8 @@ struct StatefulParityTests {
             pk = key.publicKey.rawRepresentation
             blob = try key.serializedSecretKey
             verified = try key.publicKey.isValidSignature(sig, for: message)
+            remaining = try key.remainingSignatures
+            total = try key.totalSignatures
         } else if let v = XMSS.Variant(rawValue: name) {
             let key = try XMSS.PrivateKey(v)
             KAT.seedDeterministicRNG()
@@ -115,6 +126,8 @@ struct StatefulParityTests {
             pk = key.publicKey.rawRepresentation
             blob = try key.serializedSecretKey
             verified = try key.publicKey.isValidSignature(sig, for: message)
+            remaining = try key.remainingSignatures
+            total = try key.totalSignatures
         } else if let v = LMS.Variant(rawValue: name) {
             let key = try LMS.PrivateKey(v)
             KAT.seedDeterministicRNG()
@@ -122,10 +135,13 @@ struct StatefulParityTests {
             pk = key.publicKey.rawRepresentation
             blob = try key.serializedSecretKey
             verified = try key.publicKey.isValidSignature(sig, for: message)
+            remaining = try key.remainingSignatures
+            total = try key.totalSignatures
         } else {
             throw OQSError.algorithmNotAvailable(name)
         }
-        return (Outputs(pk: pk, sk: Data(blob.dropFirst(pk.count)), sig: sig), verified)
+        return (Outputs(pk: pk, sk: Data(blob.dropFirst(pk.count)), sig: sig,
+                         remaining: remaining, total: total), verified)
     }
 
     // MARK: - The gate
@@ -163,6 +179,10 @@ struct StatefulParityTests {
                     failures.append("\(name) \(field): " + (r.count != w.count
                         ? "length \(r.count) vs \(w.count)" : "content differs (\(r.count) bytes)"))
                 }
+                if ref.remaining != got.remaining {
+                    failures.append("\(name) remaining: \(ref.remaining) vs \(got.remaining)")
+                }
+                if ref.total != got.total { failures.append("\(name) total: \(ref.total) vs \(got.total)") }
                 if !verified { failures.append("\(name): signature does not verify through the public type") }
             }
             return failures
