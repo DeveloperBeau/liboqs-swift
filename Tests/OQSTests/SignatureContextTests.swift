@@ -195,8 +195,8 @@ private let context = Data("ctx".utf8)
         #expect(throws: OQSError.invalidKeySize(expected: 1312, actual: 1311)) {
             _ = try sigVerify(algorithm: "ML-DSA-44", message: message, signature: Data(count: 4), context: context, publicKey: Data(count: 1311))
         }
-        #expect(throws: OQSError.invalidKeySize(expected: 897, actual: 0)) {
-            _ = try sigVerify(algorithm: "Falcon-512", message: message, signature: Data(count: 4), context: Data(), publicKey: Data())
+        #expect(throws: OQSError.invalidKeySize(expected: 897, actual: 896)) {
+            _ = try sigVerify(algorithm: "Falcon-512", message: message, signature: Data(count: 4), context: Data(), publicKey: Data(count: 896))
         }
         #expect(throws: OQSError.invalidKeySize(expected: 1312, actual: 5)) {
             _ = try MLDSA44.PublicKey(rawRepresentation: Data(count: 5))
@@ -208,8 +208,8 @@ private let context = Data("ctx".utf8)
         #expect(throws: OQSError.invalidKeySize(expected: 2560, actual: 2559)) {
             _ = try sigSign(algorithm: "ML-DSA-44", message: message, context: context, secretKey: Data(count: 2559))
         }
-        #expect(throws: OQSError.invalidKeySize(expected: 1281, actual: 0)) {
-            _ = try sigSign(algorithm: "Falcon-512", message: message, context: Data(), secretKey: Data())
+        #expect(throws: OQSError.invalidKeySize(expected: 1281, actual: 1280)) {
+            _ = try sigSign(algorithm: "Falcon-512", message: message, context: Data(), secretKey: Data(count: 1280))
         }
     }
 
