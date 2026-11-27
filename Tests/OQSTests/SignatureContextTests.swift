@@ -54,6 +54,30 @@ private let context = Data("ctx".utf8)
         #expect(slhdsa == 156)
     }
 
+    @Test("Registry supportsContext agrees with whether sign accepts a non-empty context for every enabled scheme")
+    func registrySupportsContextAgreesWithSigningCheck() throws {
+        var checked = 0
+        for i in 0..<OQS_SIG_alg_count() {
+            guard let id = OQS_SIG_alg_identifier(Int(i)) else { continue }
+            let name = String(cString: id)
+            guard OQS_SIG_alg_is_enabled(name) == 1 else { continue }
+            let described = try #require(Registry.signatureDescription(named: name), "\(name) has no description")
+            // An empty secret key fails the length check only after the support check passes, so no key is generated.
+            let accepted: Bool
+            do {
+                _ = try sigSign(algorithm: name, message: message, context: context, secretKey: Data())
+                accepted = true
+            } catch OQSError.contextNotSupported {
+                accepted = false
+            } catch OQSError.invalidKeySize {
+                accepted = true
+            }
+            #expect(described.supportsContext == accepted, "\(name) disagrees")
+            checked += 1
+        }
+        #expect(checked == 221)
+    }
+
     @Test("An unknown algorithm name has no context query answer")
     func supportQueryOnUnknownAlgorithmThrows() {
         #expect(throws: OQSError.algorithmNotAvailable("no-such-sig")) {

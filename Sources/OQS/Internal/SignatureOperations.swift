@@ -121,6 +121,13 @@ func sigVerify(algorithm: String, message: Data, signature: Data, publicKey: Dat
 /// The longest context string, in bytes, that liboqs accepts.
 let sigMaxContextLength = 255
 
+/// Whether the liboqs object takes a non-empty context string.
+///
+/// This is the one place that reads `sig_with_ctx_support`. The context checks and `Registry` both use it.
+func sigSupportsContext(_ sig: UnsafePointer<OQS_SIG>) -> Bool {
+    sig.pointee.sig_with_ctx_support
+}
+
 /// Whether the algorithm takes a non-empty context string, read from the liboqs object.
 func sigSupportsContext(algorithm: String) throws -> Bool {
     ensureInitialized()
@@ -130,7 +137,7 @@ func sigSupportsContext(algorithm: String) throws -> Bool {
     }
     defer { OQS_SIG_free(sig) }
 
-    return sig.pointee.sig_with_ctx_support
+    return sigSupportsContext(sig)
 }
 
 func sigSign(algorithm: String, message: Data, context: Data, secretKey: Data) throws -> Data {
@@ -142,7 +149,7 @@ func sigSign(algorithm: String, message: Data, context: Data, secretKey: Data) t
     defer { OQS_SIG_free(sig) }
 
     // Same order as the Rust port: support, key size, context length.
-    if !context.isEmpty && !sig.pointee.sig_with_ctx_support {
+    if !context.isEmpty && !sigSupportsContext(sig) {
         throw OQSError.contextNotSupported
     }
     let expectedSK = Int(sig.pointee.length_secret_key)
