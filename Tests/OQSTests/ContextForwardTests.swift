@@ -12,22 +12,49 @@ import Foundation
     private static let context = Data("ctx".utf8)
     private static let otherContext = Data("other".utf8)
 
+    /// What one type did. The calls run on a large stack because some algorithms
+    /// need more than a test worker thread has.
+    private struct Outcome: Sendable {
+        var sameContextValid = false
+        var otherContextValid = false
+        var emptyContextValid = false
+        var refusedNonEmptyContext = false
+        var plainWithEmptyContextValid = false
+        var plainWithContextValid = false
+    }
+
     @Test("Typed context forwards sign and verify with the context, or refuse it", arguments: ContextForwardTable.cases)
     func contextForwardsOfEveryType(_ entry: ContextForwardCase) throws {
         let description = try #require(Registry.signatureDescription(named: entry.name), "\(entry.name) has no description")
-        let signer = try entry.makeSigner()
-        if description.supportsContext {
-            let signature = try signer.signWithContext(Self.message, Self.context)
-            #expect(try signer.verifyWithContext(signature, Self.message, Self.context), "same context")
-            #expect(try !signer.verifyWithContext(signature, Self.message, Self.otherContext), "different context")
-            #expect(try !signer.verifyWithContext(signature, Self.message, Data()), "empty context")
-        } else {
-            #expect(throws: OQSError.contextNotSupported) {
-                _ = try signer.signWithContext(Self.message, Self.context)
+        let supportsContext = description.supportsContext
+        let outcome = try onLargeStack { () -> Outcome in
+            var outcome = Outcome()
+            let signer = try entry.makeSigner()
+            if supportsContext {
+                let signature = try signer.signWithContext(Self.message, Self.context)
+                outcome.sameContextValid = try signer.verifyWithContext(signature, Self.message, Self.context)
+                outcome.otherContextValid = try signer.verifyWithContext(signature, Self.message, Self.otherContext)
+                outcome.emptyContextValid = try signer.verifyWithContext(signature, Self.message, Data())
+            } else {
+                do {
+                    _ = try signer.signWithContext(Self.message, Self.context)
+                } catch OQSError.contextNotSupported {
+                    outcome.refusedNonEmptyContext = true
+                }
+                let plain = try signer.sign(Self.message)
+                outcome.plainWithEmptyContextValid = try signer.verifyWithContext(plain, Self.message, Data())
+                outcome.plainWithContextValid = try signer.verifyWithContext(plain, Self.message, Self.context)
             }
-            let plain = try signer.sign(Self.message)
-            #expect(try signer.verifyWithContext(plain, Self.message, Data()), "plain signature, empty context")
-            #expect(try !signer.verifyWithContext(plain, Self.message, Self.context), "plain signature, non-empty context")
+            return outcome
+        }
+        if supportsContext {
+            #expect(outcome.sameContextValid, "same context")
+            #expect(!outcome.otherContextValid, "different context")
+            #expect(!outcome.emptyContextValid, "empty context")
+        } else {
+            #expect(outcome.refusedNonEmptyContext, "non-empty context must throw contextNotSupported")
+            #expect(outcome.plainWithEmptyContextValid, "plain signature, empty context")
+            #expect(!outcome.plainWithContextValid, "plain signature, non-empty context")
         }
     }
 
