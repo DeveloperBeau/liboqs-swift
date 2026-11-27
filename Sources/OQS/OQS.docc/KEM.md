@@ -58,6 +58,15 @@ let imported = try MLKEM768.PrivateKey(
 let importedPub = try MLKEM768.PublicKey(rawRepresentation: pubData)
 ```
 
+### Seeded Key Generation
+
+The ML-KEM types can derive a key pair from a 64 byte seed and an encapsulation from a 32 byte seed. The same seed always gives the same result. No other KEM has a seeded form. Seeds are secret, so wipe your copy when you are done.
+
+```swift
+let key = try MLKEM768.PrivateKey(seed: keyPairSeed)
+let result = try key.publicKey.generateSharedSecret(seed: encapsulationSeed)
+```
+
 ## Topics
 
 ### ML-KEM (FIPS 203)
