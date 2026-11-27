@@ -100,6 +100,25 @@ let signature = try signingKey.signature(for: message)
 let valid = try signingKey.publicKey.isValidSignature(signature, for: message)
 ```
 
+### Context strings
+
+ML-DSA and SLH-DSA (the pure and pre-hash types) can bind a signature to a context string. The other stateless families take no context.
+
+```swift
+let signingKey = try MLDSA44.PrivateKey()
+let context = Data("invoice-v1".utf8)
+let signature = try signingKey.signature(for: message, context: context)
+
+// The same context must be used to verify
+let valid = try signingKey.publicKey.isValidSignature(signature, for: message, context: context)
+```
+
+- A context is at most 255 bytes.
+- An empty context gives the same signature as `signature(for:)`. Verifying with an empty context gives the same result as `isValidSignature(_:for:)`.
+- `signature(for:context:)` throws `OQSError.contextNotSupported` when the algorithm takes no context and the context is not empty. It throws `OQSError.contextTooLong` for a context over 255 bytes, and `OQSError.invalidKeySize` for a secret key of the wrong length.
+- `isValidSignature(_:for:context:)` returns `false` for a context the algorithm cannot take or one over 255 bytes. It throws `OQSError.invalidKeySize` for a public key of the wrong length.
+- Stateful signatures (XMSS, XMSS^MT, LMS) have no context.
+
 ## Algorithms
 
 Every liboqs 0.16.0 algorithm has its own Swift type with a `PrivateKey` and `PublicKey`.
@@ -179,7 +198,7 @@ Three tiers:
 
 ```bash
 swift test --skip KATTests                          # functional: keygen + roundtrip per variant
-swift test --no-parallel --filter KATTests          # deterministic KAT digests (global RNG, serial)
+swift test --no-parallel --filter KATTests          # deterministic KAT digests, including ContextKATTests (global RNG, serial)
 OQS_PARITY=1 swift test --no-parallel --filter ParityTests   # full differential parity (~12 min)
 ```
 
