@@ -61,6 +61,30 @@ static inline OQS_STATUS oqs_kem_encaps_safe(
     return OQS_KEM_encaps(kem, ciphertext, shared_secret, public_key);
 }
 
+static inline OQS_STATUS oqs_kem_keypair_derand_safe(
+        const OQS_KEM *kem,
+        uint8_t *public_key __sized_by(pk_len), size_t pk_len,
+        uint8_t *secret_key __sized_by(sk_len), size_t sk_len,
+        const uint8_t *seed __sized_by(seed_len), size_t seed_len) {
+    (void)pk_len;
+    (void)sk_len;
+    (void)seed_len;
+    return OQS_KEM_keypair_derand(kem, public_key, secret_key, seed);
+}
+
+static inline OQS_STATUS oqs_kem_encaps_derand_safe(
+        const OQS_KEM *kem,
+        uint8_t *ciphertext __sized_by(ct_len), size_t ct_len,
+        uint8_t *shared_secret __sized_by(ss_len), size_t ss_len,
+        const uint8_t *public_key __sized_by(pk_len), size_t pk_len,
+        const uint8_t *seed __sized_by(seed_len), size_t seed_len) {
+    (void)ct_len;
+    (void)ss_len;
+    (void)pk_len;
+    (void)seed_len;
+    return OQS_KEM_encaps_derand(kem, ciphertext, shared_secret, public_key, seed);
+}
+
 static inline OQS_STATUS oqs_kem_decaps_safe(
         const OQS_KEM *kem,
         uint8_t *shared_secret __sized_by(ss_len), size_t ss_len,
