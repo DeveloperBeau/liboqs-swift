@@ -69,38 +69,45 @@ import Foundation
         #expect(prehashEntries.count == 1)
         let tableNames = Set(names)
         var prehashNames = 0
+        var plainNames: Set<String> = []
         for name in Registry.enabledSignatureNames {
-            if name.hasPrefix("SLH_DSA_") && name.contains("_PREHASH_") {
+            if Self.isPrehashName(name) {
                 prehashNames += 1
                 continue
             }
+            plainNames.insert(name)
             #expect(tableNames.contains(name), "no table entry for \(name)")
         }
         #expect(prehashNames == 144)
-        #expect(Registry.enabledSignatureNames.contains(try #require(prehashEntries.first).name))
+        let prehashName = try #require(prehashEntries.first).name
+        #expect(Self.isPrehashName(prehashName) && Registry.enabledSignatureNames.contains(prehashName))
         #expect(Registry.enabledSignatureNames.count - prehashNames + 1 == cases.count)
+        // No table name that is not an enabled name.
+        #expect(tableNames == plainNames.union([prehashName]), "table and registry names differ")
 
-        let sources = Self.signatureSourceFiles()
-        #expect(sources.count == cases.count, "table has \(cases.count) entries, sources have \(sources.count) files")
-        for file in sources {
-            let lines = (try String(contentsOfFile: file, encoding: .utf8)).split(whereSeparator: \.isNewline)
-            let signs = lines.filter { $0.contains("public func signature(for data: Data, context: Data)") }
-            let verifies = lines.filter { $0.contains("public func isValidSignature(_ signature: Data, for data: Data, context: Data)") }
-            #expect(signs.count == 1 && verifies.count == 1, "\(file) needs one context sign and one context verify")
+        // The parity registry maps every liboqs name to a typed closure and is proven complete,
+        // so the table must name the same types.
+        var parityPlain: Set<String> = []
+        var parityPrehash = 0
+        for algorithm in ParityRegistry.sigs() {
+            if Self.isPrehashName(algorithm.name) { parityPrehash += 1 } else { parityPlain.insert(algorithm.name) }
         }
+        #expect(parityPrehash == 144)
+        #expect(parityPlain == plainNames, "parity registry and registry names differ")
+        #expect(parityPlain.union([prehashName]) == tableNames, "table and parity registry names differ")
     }
 
-    // Stateless signature type files, found from this file's path.
-    private static func signatureSourceFiles() -> [String] {
-        let root = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("Sources/OQS/Signatures")
-        guard let walker = FileManager.default.enumerator(atPath: root.path) else { return [] }
-        var files: [String] = []
-        for case let relative as String in walker where relative.hasSuffix(".swift") {
-            if relative.split(separator: "/").contains("StatefulHash") { continue }
-            files.append(root.appendingPathComponent(relative).path)
-        }
-        return files
+    @Test("Every table entry's closures belong to its own type, by the key lengths of the generated keys",
+          arguments: ContextForwardTable.cases)
+    func tableEntryMatchesItsType(_ entry: ContextForwardCase) throws {
+        let description = try #require(Registry.signatureDescription(named: entry.name), "\(entry.name) has no description")
+        let signer = try onLargeStack { try entry.makeSigner() }
+        #expect(signer.publicKeyLength == description.publicKeyLength, "public key length of \(entry.name)")
+        #expect(signer.secretKeyLength == description.secretKeyLength, "secret key length of \(entry.name)")
+    }
+
+    // The names of the SLH-DSA pre-hash combinations, which share one table entry.
+    private static func isPrehashName(_ name: String) -> Bool {
+        name.hasPrefix("SLH_DSA_") && name.contains("_PREHASH_")
     }
 }
