@@ -107,22 +107,69 @@ final class StatefulSigningKey {
         }
     }
 
+    /// How many signatures the key can still make, as liboqs counts it.
+    ///
+    /// Throws ``OQSError/invalidKeySize(expected:actual:)`` when liboqs cannot
+    /// read the key, see ``unreadableKey``. After the last LMS signature liboqs
+    /// can no longer read the key. After the last XMSS signature the count wraps
+    /// to `UInt64.max`.
     var remainingSignatures: UInt64 {
         get throws {
             var remain: UInt64 = 0
-            let rc = OQS_SIG_STFL_sigs_remaining(sig, &remain, sk)
-            guard rc == OQS_SUCCESS else { throw OQSError.signFailed }
+            guard OQS_SIG_STFL_sigs_remaining(sig, &remain, sk) == OQS_SUCCESS else {
+                throw unreadableKey
+            }
             return remain
         }
+    }
+
+    /// How many signatures the key can make over its life, as liboqs counts it.
+    ///
+    /// This is `2^h - 1` for a tree of height `h`. It does not change as the key
+    /// is used. It throws the same error as ``remainingSignatures``.
+    var totalSignatures: UInt64 {
+        get throws {
+            var total: UInt64 = 0
+            guard OQS_SIG_STFL_sigs_total(sig, &total, sk) == OQS_SUCCESS else {
+                throw unreadableKey
+            }
+            return total
+        }
+    }
+
+    /// The error for a count liboqs could not read from the key.
+    ///
+    /// No length failed, so this reports the secret-key length liboqs expects
+    /// and zero readable bytes.
+    private var unreadableKey: OQSError {
+        .invalidKeySize(expected: Int(sig.pointee.length_secret_key), actual: 0)
+    }
+
+    /// Decides what a liboqs sign call produced, in the order the ports share.
+    ///
+    /// A failed persist is ``OQSError/persistenceFailed``. Any other error status
+    /// is ``OQSError/signFailed``, even when liboqs wrote a length, because XMSS
+    /// writes the length before it stores the state. A success with no length is
+    /// ``OQSError/keyExhausted``, because liboqs leaves the length alone when LMS
+    /// has no signature left. Otherwise the produced length is returned.
+    static func producedLength(status: OQS_STATUS, length: Int, persistFailed: Bool) throws -> Int {
+        if persistFailed { throw OQSError.persistenceFailed }
+        guard status == OQS_SUCCESS else { throw OQSError.signFailed }
+        guard length > 0 else { throw OQSError.keyExhausted }
+        return length
     }
 
     /// Sign `message`, persisting the advanced key state via `store` before the
     /// signature is returned.
     ///
     /// The signature is returned IF AND ONLY IF `store` completed without
-    /// throwing. If `store` throws, that error is rethrown and the signature is
-    /// discarded. If signing fails for any other reason, ``OQSError/signFailed``
-    /// is thrown.
+    /// throwing. If `store` throws, ``OQSError/persistenceFailed`` is thrown and
+    /// the signature is discarded. See ``producedLength(status:length:persistFailed:)``
+    /// for the other errors.
+    ///
+    /// As in liboqs, one key makes ``totalSignatures`` + 1 signatures, and the
+    /// last is made when ``remainingSignatures`` already reads 0. An LMS key then
+    /// throws ``OQSError/keyExhausted``. An XMSS key throws ``OQSError/signFailed``.
     func signature(for message: Data, persistingTo store: (Data) throws -> Void) throws -> Data {
         // The box does not outlive this call (withExtendedLifetime below), so
         // it's safe to bridge the non-escaping closure across the FFI boundary.
@@ -165,14 +212,9 @@ final class StatefulSigningKey {
         }
         #endif
 
-        guard rc == OQS_SUCCESS else {
-            // Surface the user's real persistence error if that's why we failed;
-            // otherwise a generic sign failure. Either way: no signature returned.
-            if let caught = box.caughtError { throw caught }
-            throw OQSError.signFailed
-        }
-
-        signature.removeSubrange(actualLen...)
+        let length = try Self.producedLength(
+            status: rc, length: actualLen, persistFailed: box.caughtError != nil)
+        signature.removeSubrange(length...)
         return signature
     }
 }

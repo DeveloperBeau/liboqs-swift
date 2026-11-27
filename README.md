@@ -162,8 +162,10 @@ Every liboqs 0.16.0 algorithm has its own Swift type with a `PrivateKey` and `Pu
 XMSS, XMSS^MT, and LMS are *stateful* hash-based schemes: every signature consumes a one-time key index, and reusing an index breaks the scheme. They use a different API from the rest of the library:
 
 - `PrivateKey` is a reference type (a `final class`) that owns mutable key state and is intentionally **not** `Sendable`.
-- `signature(for:persistingTo:)` hands you a signature only after your persist closure durably stores the advanced key state. If the closure throws, you get no signature.
+- `signature(for:persistingTo:)` hands you a signature only after your persist closure durably stores the advanced key state. If the closure throws, you get `OQSError.persistenceFailed` and no signature.
 - Verification (`isValidSignature(_:for:)`) is stateless.
+- `totalSignatures` is `2^h - 1` for a tree of height `h` and does not drop. `remainingSignatures` drops by one per signature. If liboqs cannot read the key, both throw `OQSError.invalidKeySize`.
+- As in liboqs, one key makes `totalSignatures` + 1 signatures. The last is made when `remainingSignatures` already reads 0. For LMS it verifies, and the next sign throws `OQSError.keyExhausted`. For XMSS and XMSS^MT it does not verify, `remainingSignatures` wraps to `UInt64.max`, and the next sign throws `OQSError.signFailed`.
 
 ```swift
 import OQS

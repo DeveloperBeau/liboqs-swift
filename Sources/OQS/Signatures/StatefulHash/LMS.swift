@@ -115,13 +115,34 @@ public enum LMS: Sendable {
             get throws { try engine.serialized }
         }
 
-        /// Number of signatures the key can still produce.
+        /// Number of signatures the key can still produce, as liboqs counts it.
+        ///
+        /// Throws ``OQSError/invalidKeySize(expected:actual:)`` when liboqs cannot
+        /// read the key. After the last signature liboqs can no longer read it.
         public var remainingSignatures: UInt64 {
             get throws { try engine.remainingSignatures }
         }
 
-        /// Sign `data`, persisting the advanced key state via `store`. The
-        /// signature is returned IF AND ONLY IF `store` returns without throwing.
+        /// Number of signatures the key can make over its life, `2^h - 1` for a
+        /// tree of height `h`.
+        ///
+        /// It does not drop as the key is used. One key makes this many signatures
+        /// plus one, and the last is made when ``remainingSignatures`` reads 0.
+        /// Throws ``OQSError/invalidKeySize(expected:actual:)`` when liboqs cannot
+        /// read the key.
+        public var totalSignatures: UInt64 {
+            get throws { try engine.totalSignatures }
+        }
+
+        /// Sign `data`, persisting the advanced key state via `store`.
+        ///
+        /// The signature is returned IF AND ONLY IF `store` returns without
+        /// throwing. If `store` throws, ``OQSError/persistenceFailed`` is thrown
+        /// and no signature is returned. Persist the bytes handed to `store`
+        /// durably (the same self-contained format as ``serializedSecretKey``).
+        ///
+        /// A key makes one signature past ``totalSignatures``. After that, sign
+        /// throws ``OQSError/keyExhausted``.
         public func signature(for data: Data, persistingTo store: (Data) throws -> Void) throws -> Data {
             try engine.signature(for: data, persistingTo: store)
         }
