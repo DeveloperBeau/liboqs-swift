@@ -48,6 +48,21 @@ public enum MLKEM512: Sendable {
             self.publicKey = PublicKey(unchecked: kp.publicKey)
         }
 
+        /// Generates the key pair that the given seed determines.
+        ///
+        /// The same seed always gives the same key pair. The seed must be exactly
+        /// 64 bytes. It is secret, because anyone who has it can rebuild the private key,
+        /// so wipe your copy once you no longer need it.
+        ///
+        /// - Parameter seed: The 64 secret seed bytes.
+        /// - Throws: ``OQSError/invalidKeySize(expected:actual:)`` if the seed is not 64 bytes,
+        ///   or ``OQSError/keyGenerationFailed`` if liboqs reports an error.
+        public init(seed: Data) throws {
+            let kp = try kemGenerateKeyPair(algorithm: MLKEM512.algorithmName, seed: seed)
+            self.rawRepresentation = kp.secretKey
+            self.publicKey = PublicKey(unchecked: kp.publicKey)
+        }
+
         /// Imports a private key from raw bytes.
         public init(rawRepresentation: Data, publicKeyRepresentation: Data) throws {
             let lengths = try kemExpectedKeyLengths(algorithm: MLKEM512.algorithmName)
@@ -89,6 +104,23 @@ public enum MLKEM512: Sendable {
         /// Generates a new shared secret using this public key.
         public func generateSharedSecret() throws -> SharedSecretResult {
             let result = try kemEncapsulate(algorithm: MLKEM512.algorithmName, publicKey: rawRepresentation)
+            return SharedSecretResult(
+                sharedSecret: SharedSecret(rawRepresentation: result.sharedSecret),
+                ciphertext: result.ciphertext
+            )
+        }
+
+        /// Generates the shared secret and ciphertext that the given seed determines.
+        ///
+        /// The same public key and seed always give the same result. The seed must be
+        /// exactly 32 bytes. It is secret, because anyone who has it and the public key
+        /// can rebuild the shared secret, so wipe your copy once you no longer need it.
+        ///
+        /// - Parameter seed: The 32 secret seed bytes.
+        /// - Throws: ``OQSError/invalidKeySize(expected:actual:)`` if the seed is not 32 bytes,
+        ///   or ``OQSError/encapsulationFailed`` if liboqs reports an error.
+        public func generateSharedSecret(seed: Data) throws -> SharedSecretResult {
+            let result = try kemEncapsulate(algorithm: MLKEM512.algorithmName, publicKey: rawRepresentation, seed: seed)
             return SharedSecretResult(
                 sharedSecret: SharedSecret(rawRepresentation: result.sharedSecret),
                 ciphertext: result.ciphertext

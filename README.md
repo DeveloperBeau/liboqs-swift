@@ -87,6 +87,18 @@ let secret = try aliceKey.decryptSharedSecret(ciphertext)
 let symmetricKey = SymmetricKey(data: secret.rawRepresentation)
 ```
 
+### Seeded key generation
+
+ML-KEM can also derive a key pair or an encapsulation from a seed. The same seed always gives the same output.
+
+```swift
+// A 64 byte seed gives a key pair, a 32 byte seed gives an encapsulation
+let key = try MLKEM768.PrivateKey(seed: keyPairSeed)
+let result = try key.publicKey.generateSharedSecret(seed: encapsulationSeed)
+```
+
+Only `MLKEM512`, `MLKEM768` and `MLKEM1024` have this form, because liboqs 0.16.0 offers seeded operations for no other algorithm. A seed of the wrong length throws `OQSError.invalidKeySize`. Seeds are secret, so wipe your copy when you are done. The package does not keep one.
+
 ### Signatures
 
 ```swift
