@@ -92,6 +92,13 @@ So you do what TLS, Signal, and SSH all do: use a KEM to agree on a shared secre
 - ``XMSSMT``
 - ``LMS``
 
+### Algorithm Lookup
+
+- ``Registry``
+- ``KEMDescription``
+- ``SignatureDescription``
+- ``StatefulSignatureDescription``
+
 ### Shared Types
 
 - ``SharedSecret``

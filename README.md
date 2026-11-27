@@ -100,6 +100,28 @@ let signature = try signingKey.signature(for: message)
 let valid = try signingKey.publicKey.isValidSignature(signature, for: message)
 ```
 
+### Algorithm lookup
+
+`Registry` lists the algorithms this build enables and reports what liboqs knows about each one. The lists are in liboqs order. A lookup ignores the case of ASCII letters, as liboqs does, and the description always carries the liboqs name.
+
+```swift
+import OQS
+
+print(Registry.enabledKEMNames.count)               // 41
+print(Registry.isSignatureEnabled("ml-dsa-65"))     // true
+
+if let kem = Registry.kemDescription(named: "ml-kem-768") {
+    print(kem.name)                // ML-KEM-768
+    print(kem.claimedNISTLevel)    // 3
+    print(kem.ciphertextLength)    // 1088
+}
+
+let lms = Registry.statefulSignatureDescription(named: "LMS_SHA256_H5_W8")
+print(lms?.signatureLength ?? 0)   // 1296
+```
+
+A name that is not enabled gives `nil` and `false`. The values come from the vendored liboqs, which is still pinned at 0.16.0.
+
 ### Context strings
 
 ML-DSA and SLH-DSA (the pure and pre-hash types) can bind a signature to a context string. The other stateless families take no context.
@@ -118,6 +140,7 @@ let valid = try signingKey.publicKey.isValidSignature(signature, for: message, c
 - `signature(for:context:)` throws `OQSError.contextNotSupported` when the algorithm takes no context and the context is not empty. It throws `OQSError.contextTooLong` for a context over 255 bytes, and `OQSError.invalidKeySize` for a secret key of the wrong length.
 - `isValidSignature(_:for:context:)` returns `false` for a context the algorithm cannot take or one over 255 bytes. It throws `OQSError.invalidKeySize` for a public key of the wrong length.
 - Stateful signatures (XMSS, XMSS^MT, LMS) have no context.
+- To check whether an algorithm takes a context, read `Registry.signatureDescription(named:)?.supportsContext`.
 
 ## Algorithms
 
