@@ -19,8 +19,14 @@ public enum OQSError: Error, Sendable, Equatable, Hashable, CustomStringConverti
     /// The provided key data has the wrong size.
     case invalidKeySize(expected: Int, actual: Int)
     /// The algorithm does not take a context string.
+    ///
+    /// Thrown by `signature(for:context:)` on the stateless signature private keys
+    /// when the context is not empty and the algorithm has no context support.
     case contextNotSupported
     /// The context string is longer than the algorithm allows.
+    ///
+    /// Thrown by `signature(for:context:)` on the stateless signature private keys
+    /// when the context is over 255 bytes.
     case contextTooLong
     /// The algorithm has no form of the operation that takes a seed.
     case seedNotSupported
