@@ -38,7 +38,7 @@ public enum SNOVA24_5_4_esk: Sendable {
     /// A SNOVA-24-5-4-esk private (signing) key.
     public struct PrivateKey: Sendable {
         /// The raw key bytes.
-        public let rawRepresentation: Data
+        public let rawRepresentation: SecretBytes
         /// The corresponding public key.
         public let publicKey: PublicKey
 
@@ -50,7 +50,7 @@ public enum SNOVA24_5_4_esk: Sendable {
         }
 
         /// Imports a private key from raw bytes.
-        public init(rawRepresentation: Data, publicKeyRepresentation: Data) throws {
+        public init(rawRepresentation: SecretBytes, publicKeyRepresentation: Data) throws {
             let lengths = try sigExpectedKeyLengths(algorithm: SNOVA24_5_4_esk.algorithmName)
             guard rawRepresentation.count == lengths.secretKey else {
                 throw OQSError.invalidKeySize(expected: lengths.secretKey, actual: rawRepresentation.count)

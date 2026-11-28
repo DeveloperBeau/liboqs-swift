@@ -1,7 +1,7 @@
 import Foundation
 internal import Cliboqs
 
-func sigGenerateKeyPair(algorithm: String) throws -> (publicKey: Data, secretKey: Data) {
+func sigGenerateKeyPair(algorithm: String) throws -> (publicKey: Data, secretKey: SecretBytes) {
     ensureInitialized()
 
     guard let sig = OQS_SIG_new(algorithm) else {
@@ -12,29 +12,25 @@ func sigGenerateKeyPair(algorithm: String) throws -> (publicKey: Data, secretKey
     let pkLen = Int(sig.pointee.length_public_key)
     let skLen = Int(sig.pointee.length_secret_key)
     var publicKey = Data(count: pkLen)
-    var secretKey = Data(count: skLen)
-
-    #if OQS_SAFE_INTEROP
-    let rc = publicKey.withUnsafeMutableBytes { pk in
-        secretKey.withUnsafeMutableBytes { sk in
+    let secretKey = try SecretBytes(memory: LiboqsSecretMemory(), count: skLen) { sk in
+        #if OQS_SAFE_INTEROP
+        let rc = publicKey.withUnsafeMutableBytes { pk in
             oqs_sig_keypair_safe(sig, pk, sk)
         }
-    }
-    #else
-    let rc = publicKey.withUnsafeMutableBytes { pk in
-        secretKey.withUnsafeMutableBytes { sk in
+        #else
+        let rc = publicKey.withUnsafeMutableBytes { pk in
             OQS_SIG_keypair(sig,
                 pk.baseAddress?.assumingMemoryBound(to: UInt8.self),
                 sk.baseAddress?.assumingMemoryBound(to: UInt8.self))
         }
+        #endif
+        guard rc == OQS_SUCCESS else { throw OQSError.keyGenerationFailed }
     }
-    #endif
-    guard rc == OQS_SUCCESS else { throw OQSError.keyGenerationFailed }
 
     return (publicKey: publicKey, secretKey: secretKey)
 }
 
-func sigSign(algorithm: String, message: Data, secretKey: Data) throws -> Data {
+func sigSign(algorithm: String, message: Data, secretKey: SecretBytes) throws -> Data {
     ensureInitialized()
 
     guard let sig = OQS_SIG_new(algorithm) else {

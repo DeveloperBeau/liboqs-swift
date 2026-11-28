@@ -32,7 +32,7 @@ public enum MLDSA44: Sendable {
     static let algorithmName = "ML-DSA-44"
 
     public struct PrivateKey: Sendable {
-        public let rawRepresentation: Data
+        public let rawRepresentation: SecretBytes
         public let publicKey: PublicKey
 
         public init() throws {
@@ -41,7 +41,7 @@ public enum MLDSA44: Sendable {
             self.publicKey = PublicKey(unchecked: kp.publicKey)
         }
 
-        public init(rawRepresentation: Data, publicKeyRepresentation: Data) throws {
+        public init(rawRepresentation: SecretBytes, publicKeyRepresentation: Data) throws {
             let lengths = try sigExpectedKeyLengths(algorithm: MLDSA44.algorithmName)
             guard rawRepresentation.count == lengths.secretKey else {
                 throw OQSError.invalidKeySize(expected: lengths.secretKey, actual: rawRepresentation.count)

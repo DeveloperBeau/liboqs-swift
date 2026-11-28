@@ -37,23 +37,23 @@ internal import Cliboqs
             sharedSecretDigest: "10f3aedb1a3440f36128242e3f158ea8503f9e3b74e18e253f60c8ad0e20cac8",
             makeKeyPair: { seed in
                 let key = try MLKEM512.PrivateKey(seed: seed)
-                return (key.publicKey.rawRepresentation, key.rawRepresentation)
+                return (key.publicKey.rawRepresentation, key.rawRepresentation.makeData())
             },
             makeRandomKeyPair: {
                 let key = try MLKEM512.PrivateKey()
-                return (key.publicKey.rawRepresentation, key.rawRepresentation)
+                return (key.publicKey.rawRepresentation, key.rawRepresentation.makeData())
             },
             encapsulate: { publicKey, seed in
                 let result = try MLKEM512.PublicKey(rawRepresentation: publicKey).generateSharedSecret(seed: seed)
-                return (result.ciphertext, result.sharedSecret.rawRepresentation)
+                return (result.ciphertext, result.sharedSecret.rawRepresentation.makeData())
             },
             encapsulateRandom: { publicKey in
                 let result = try MLKEM512.PublicKey(rawRepresentation: publicKey).generateSharedSecret()
-                return (result.ciphertext, result.sharedSecret.rawRepresentation)
+                return (result.ciphertext, result.sharedSecret.rawRepresentation.makeData())
             },
             decapsulate: { secretKey, publicKey, ciphertext in
-                try MLKEM512.PrivateKey(rawRepresentation: secretKey, publicKeyRepresentation: publicKey)
-                    .decryptSharedSecret(ciphertext).rawRepresentation
+                try MLKEM512.PrivateKey(rawRepresentation: SecretBytes(copying: secretKey), publicKeyRepresentation: publicKey)
+                    .decryptSharedSecret(ciphertext).rawRepresentation.makeData()
             }
         ),
         Variant(
@@ -64,23 +64,23 @@ internal import Cliboqs
             sharedSecretDigest: "3211693eed5183e918a272986290fdf7419bcae0f2f648533dcfb290ca670c19",
             makeKeyPair: { seed in
                 let key = try MLKEM768.PrivateKey(seed: seed)
-                return (key.publicKey.rawRepresentation, key.rawRepresentation)
+                return (key.publicKey.rawRepresentation, key.rawRepresentation.makeData())
             },
             makeRandomKeyPair: {
                 let key = try MLKEM768.PrivateKey()
-                return (key.publicKey.rawRepresentation, key.rawRepresentation)
+                return (key.publicKey.rawRepresentation, key.rawRepresentation.makeData())
             },
             encapsulate: { publicKey, seed in
                 let result = try MLKEM768.PublicKey(rawRepresentation: publicKey).generateSharedSecret(seed: seed)
-                return (result.ciphertext, result.sharedSecret.rawRepresentation)
+                return (result.ciphertext, result.sharedSecret.rawRepresentation.makeData())
             },
             encapsulateRandom: { publicKey in
                 let result = try MLKEM768.PublicKey(rawRepresentation: publicKey).generateSharedSecret()
-                return (result.ciphertext, result.sharedSecret.rawRepresentation)
+                return (result.ciphertext, result.sharedSecret.rawRepresentation.makeData())
             },
             decapsulate: { secretKey, publicKey, ciphertext in
-                try MLKEM768.PrivateKey(rawRepresentation: secretKey, publicKeyRepresentation: publicKey)
-                    .decryptSharedSecret(ciphertext).rawRepresentation
+                try MLKEM768.PrivateKey(rawRepresentation: SecretBytes(copying: secretKey), publicKeyRepresentation: publicKey)
+                    .decryptSharedSecret(ciphertext).rawRepresentation.makeData()
             }
         ),
         Variant(
@@ -91,23 +91,23 @@ internal import Cliboqs
             sharedSecretDigest: "0bf615778a6c71e8915a2ec482a0f5a24dbdcd15ddaa55e3c0d7c5df7a4f3910",
             makeKeyPair: { seed in
                 let key = try MLKEM1024.PrivateKey(seed: seed)
-                return (key.publicKey.rawRepresentation, key.rawRepresentation)
+                return (key.publicKey.rawRepresentation, key.rawRepresentation.makeData())
             },
             makeRandomKeyPair: {
                 let key = try MLKEM1024.PrivateKey()
-                return (key.publicKey.rawRepresentation, key.rawRepresentation)
+                return (key.publicKey.rawRepresentation, key.rawRepresentation.makeData())
             },
             encapsulate: { publicKey, seed in
                 let result = try MLKEM1024.PublicKey(rawRepresentation: publicKey).generateSharedSecret(seed: seed)
-                return (result.ciphertext, result.sharedSecret.rawRepresentation)
+                return (result.ciphertext, result.sharedSecret.rawRepresentation.makeData())
             },
             encapsulateRandom: { publicKey in
                 let result = try MLKEM1024.PublicKey(rawRepresentation: publicKey).generateSharedSecret()
-                return (result.ciphertext, result.sharedSecret.rawRepresentation)
+                return (result.ciphertext, result.sharedSecret.rawRepresentation.makeData())
             },
             decapsulate: { secretKey, publicKey, ciphertext in
-                try MLKEM1024.PrivateKey(rawRepresentation: secretKey, publicKeyRepresentation: publicKey)
-                    .decryptSharedSecret(ciphertext).rawRepresentation
+                try MLKEM1024.PrivateKey(rawRepresentation: SecretBytes(copying: secretKey), publicKeyRepresentation: publicKey)
+                    .decryptSharedSecret(ciphertext).rawRepresentation.makeData()
             }
         ),
     ]

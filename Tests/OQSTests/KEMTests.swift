@@ -331,7 +331,7 @@ import Foundation
         let key = try MLKEM768.PrivateKey()
         #expect(throws: OQSError.self) {
             try MLKEM768.PrivateKey(
-                rawRepresentation: Data([0x00]),
+                rawRepresentation: SecretBytes(copying: Data([0x00])),
                 publicKeyRepresentation: key.publicKey.rawRepresentation
             )
         }
@@ -361,7 +361,7 @@ import Foundation
     func privateKeyImportEmptySecret() throws {
         #expect(throws: OQSError.self) {
             try MLKEM768.PrivateKey(
-                rawRepresentation: Data(),
+                rawRepresentation: SecretBytes(copying: Data()),
                 publicKeyRepresentation: Data()
             )
         }
@@ -405,7 +405,7 @@ import Foundation
     @Test("FrodoKEM-640-AES rejects wrong-size key import")
     func frodo640AESInvalidSize() {
         #expect(throws: OQSError.self) {
-            try FrodoKEM640AES.PrivateKey(rawRepresentation: Data([0x00]),
+            try FrodoKEM640AES.PrivateKey(rawRepresentation: SecretBytes(copying: Data([0x00])),
                                           publicKeyRepresentation: Data([0x00]))
         }
         #expect(throws: OQSError.self) {

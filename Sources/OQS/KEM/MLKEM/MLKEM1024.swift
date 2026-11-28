@@ -36,8 +36,8 @@ public enum MLKEM1024: Sendable {
 
     /// A MLKEM1024 private (decapsulation) key.
     public struct PrivateKey: Sendable {
-        /// The raw key bytes.
-        public let rawRepresentation: Data
+        /// The secret key bytes, held in storage that is wiped when the key is released.
+        public let rawRepresentation: SecretBytes
         /// The corresponding public key.
         public let publicKey: PublicKey
 
@@ -64,7 +64,7 @@ public enum MLKEM1024: Sendable {
         }
 
         /// Imports a private key from raw bytes.
-        public init(rawRepresentation: Data, publicKeyRepresentation: Data) throws {
+        public init(rawRepresentation: SecretBytes, publicKeyRepresentation: Data) throws {
             let lengths = try kemExpectedKeyLengths(algorithm: MLKEM1024.algorithmName)
             guard rawRepresentation.count == lengths.secretKey else {
                 throw OQSError.invalidKeySize(expected: lengths.secretKey, actual: rawRepresentation.count)

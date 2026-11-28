@@ -41,7 +41,7 @@ public enum MAYO5: Sendable {
     static let algorithmName = "MAYO-5"
 
     public struct PrivateKey: Sendable {
-        public let rawRepresentation: Data
+        public let rawRepresentation: SecretBytes
         public let publicKey: PublicKey
 
         public init() throws {
@@ -50,7 +50,7 @@ public enum MAYO5: Sendable {
             self.publicKey = PublicKey(unchecked: kp.publicKey)
         }
 
-        public init(rawRepresentation: Data, publicKeyRepresentation: Data) throws {
+        public init(rawRepresentation: SecretBytes, publicKeyRepresentation: Data) throws {
             let lengths = try sigExpectedKeyLengths(algorithm: MAYO5.algorithmName)
             guard rawRepresentation.count == lengths.secretKey else {
                 throw OQSError.invalidKeySize(expected: lengths.secretKey, actual: rawRepresentation.count)

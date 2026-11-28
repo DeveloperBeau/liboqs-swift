@@ -8,4 +8,6 @@ struct ParityAlgorithm: Sendable {
     let name: String
     let run: @Sendable () throws -> [(String, Data)]
     let typedLengths: @Sendable () throws -> TypedLengths
+    /// Uses the key, exports it, rebuilds it and uses the rebuilt key.
+    let secretFlow: @Sendable () throws -> SecretFlow
 }

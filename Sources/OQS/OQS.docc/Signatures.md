@@ -17,6 +17,8 @@ let signature = try signingKey.signature(for: messageData)
 let valid = try signingKey.publicKey.isValidSignature(signature, for: messageData)
 ```
 
+Private keys keep their bytes in a ``SecretBytes`` value that is wiped from memory when the last reference goes away. To save a key, call `makeData()` on its `rawRepresentation`. To load it, pass `SecretBytes(copying:)` to the key initializer. Both copy the bytes, and the `Data` is yours to wipe.
+
 ## Topics
 
 ### ML-DSA (FIPS 204)
