@@ -15,9 +15,4 @@ extension SecretBytes {
             }
         }
     }
-
-    /// Allocates `count` zeroed bytes backed by liboqs and lets `filling` write them.
-    convenience init(count: Int, filling: (UnsafeMutableRawBufferPointer) throws -> Void) rethrows {
-        try self.init(memory: LiboqsSecretMemory(), count: count, filling: filling)
-    }
 }
