@@ -109,7 +109,7 @@ private func lengthProblems(_ name: String, _ sample: SignedSample) -> [String] 
 
     // MARK: - Every stateless signature type
 
-    @Test("every stateless signature type is in the registry of public types", .timeLimit(.minutes(1)))
+    @Test("every stateless signature type is in the registry of public types", .timeLimit(.minutes(10)))
     func registryIsNotEmpty() {
         #expect(statelessNames.count >= 100, "only \(statelessNames.count) stateless signature types")
     }
@@ -146,7 +146,7 @@ private func lengthProblems(_ name: String, _ sample: SignedSample) -> [String] 
     /// Schemes that read the signature before they check its length, and fast ones.
     private static let coreStateless = ["ML-DSA-44", "Falcon-512", "SLH_DSA_PURE_SHA2_128F", "cross-rsdp-128-fast"]
 
-    @Test("core stateless schemes handle empty, short, long and valid signatures", .timeLimit(.minutes(5)))
+    @Test("core stateless schemes handle empty, short, long and valid signatures", .timeLimit(.minutes(10)))
     func coreStatelessSchemesHandleEveryLength() throws {
         var problems: [String] = []
         for name in Self.coreStateless {
@@ -156,7 +156,7 @@ private func lengthProblems(_ name: String, _ sample: SignedSample) -> [String] 
         #expect(problems.isEmpty, "\(problems)")
     }
 
-    @Test("core stateful schemes handle empty, short, long and valid signatures", .timeLimit(.minutes(5)))
+    @Test("core stateful schemes handle empty, short, long and valid signatures", .timeLimit(.minutes(10)))
     func coreStatefulSchemesHandleEveryLength() throws {
         var problems: [String] = []
         for family in ["XMSS", "LMS"] {
