@@ -240,9 +240,11 @@ import Foundation
 
     // MARK: - Concurrency
 
-    @Test("One private key signs from many tasks and one shared secret is compared from many tasks, all correct",
+    // Plain threads, not the cooperative pool: other suites block the pool's few
+    // threads on long key generations, and a task group here would wait behind them.
+    @Test("One private key signs from many threads and one shared secret is compared from many threads, all correct",
           .timeLimit(.minutes(2)))
-    func concurrentUse() async throws {
+    func concurrentUse() throws {
         let key = try MLDSA44.PrivateKey()
         let sealed = try MLKEM768.PrivateKey().publicKey.generateSharedSecret()
         let copy = SharedSecret(rawRepresentation: SecretBytes(copying: sealed.sharedSecret.rawRepresentation.makeData()))
@@ -251,19 +253,32 @@ import Foundation
         let different = SharedSecret(rawRepresentation: SecretBytes(copying: other))
         let message = Data("concurrent".utf8)
 
-        let results = try await withThrowingTaskGroup(of: Bool.self, returning: [Bool].self) { group in
-            for _ in 0..<32 {
-                group.addTask {
-                    let signature = try key.signature(for: message)
-                    return try key.publicKey.isValidSignature(signature, for: message)
+        let lock = NSLock()
+        nonisolated(unsafe) var results: [Bool] = []
+        let group = DispatchGroup()
+        for _ in 0..<8 {
+            group.enter()
+            let thread = Thread {
+                defer { group.leave() }
+                for _ in 0..<4 {
+                    let verified = (try? key.signature(for: message))
+                        .flatMap { try? key.publicKey.isValidSignature($0, for: message) } ?? false
+                    let compared = sealed.sharedSecret == copy && sealed.sharedSecret != different
+                    lock.lock()
+                    results.append(verified)
+                    results.append(compared)
+                    lock.unlock()
                 }
-                group.addTask { sealed.sharedSecret == copy && sealed.sharedSecret != different }
             }
-            var all: [Bool] = []
-            for try await result in group { all.append(result) }
-            return all
+            thread.stackSize = 8 << 20
+            thread.start()
         }
-        #expect(results.count == 64)
-        #expect(results.allSatisfy { $0 })
+        let finished = group.wait(timeout: .now() + 90)
+        #expect(finished == .success, "the worker threads did not finish within 90 seconds")
+        lock.lock()
+        let snapshot = results
+        lock.unlock()
+        #expect(snapshot.count == 64)
+        #expect(snapshot.allSatisfy { $0 })
     }
 }
