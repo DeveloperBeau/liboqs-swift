@@ -43,7 +43,14 @@ enum ParityRegistry {
             KAT.seedDeterministicRNG()
             let sg = try key.signature(for: message)
             return [("pk", key.publicKey.rawRepresentation), ("sk", key.rawRepresentation), ("sig", sg)]
-        }, typedLengths: typedLengths)
+        }, typedLengths: typedLengths, signed: {
+            let key = try make()
+            let pub = key.publicKey
+            return SignedSample(
+                message: message, publicKey: pub.rawRepresentation,
+                signature: try key.signature(for: message),
+                verify: { try pub.isValidSignature($0, for: message) })
+        })
     }
 
     private static func sig<K: ParityImportableSigPrivateKey>(
