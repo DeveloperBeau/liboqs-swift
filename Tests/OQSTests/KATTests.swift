@@ -21,8 +21,8 @@ import Foundation
 
         let sk = try MLKEM512.PrivateKey()
         let sealed = try sk.publicKey.generateSharedSecret()
-        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
-            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation.makeData()
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation.makeData()
         let digest = KAT.sha3_256Hex(blob)
 
         let expected = try KATHashes.shared.hash(for: "ML-KEM-512")
@@ -35,8 +35,8 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let sk = try FrodoKEM640AES.PrivateKey()
         let sealed = try sk.publicKey.generateSharedSecret()
-        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
-            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation.makeData()
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation.makeData()
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "FrodoKEM-640-AES")))
     }
 
@@ -46,8 +46,8 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let sk = try NTRUHPS2048509.PrivateKey()
         let sealed = try sk.publicKey.generateSharedSecret()
-        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
-            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation.makeData()
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation.makeData()
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "NTRU-HPS-2048-509")))
     }
 
@@ -57,8 +57,8 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let sk = try SNTRUP761.PrivateKey()
         let sealed = try sk.publicKey.generateSharedSecret()
-        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
-            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation.makeData()
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation.makeData()
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "sntrup761")))
     }
 
@@ -68,7 +68,7 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let key = try MLDSA44.PrivateKey()
         let sig = try key.signature(for: Data("KAT".utf8))
-        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation.makeData() + sig
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "ML-DSA-44")))
     }
 
@@ -78,7 +78,7 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let key = try MAYO1.PrivateKey()
         let sig = try key.signature(for: Data("KAT".utf8))
-        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation.makeData() + sig
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "MAYO-1")))
     }
 
@@ -88,7 +88,7 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let key = try SNOVA24_5_4.PrivateKey()
         let sig = try key.signature(for: Data("KAT".utf8))
-        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation.makeData() + sig
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "SNOVA_24_5_4")))
     }
 
@@ -98,7 +98,7 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let key = try OVIs.PrivateKey()
         let sig = try key.signature(for: Data("KAT".utf8))
-        let blob = key.publicKey.rawRepresentation + key.rawRepresentation + sig
+        let blob = key.publicKey.rawRepresentation + key.rawRepresentation.makeData() + sig
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "OV-Is")))
     }
 
@@ -108,8 +108,8 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let sk = try BIKEL1.PrivateKey()
         let sealed = try sk.publicKey.generateSharedSecret()
-        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
-            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation.makeData()
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation.makeData()
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "BIKE-L1")))
     }
 
@@ -144,8 +144,8 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let sk = try EFrodoKEM640AES.PrivateKey()
         let sealed = try sk.publicKey.generateSharedSecret()
-        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
-            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation.makeData()
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation.makeData()
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "eFrodoKEM-640-AES")))
     }
 
@@ -155,8 +155,8 @@ import Foundation
         defer { KAT.restoreSystemRNG() }
         let sk = try HQC1.PrivateKey()
         let sealed = try sk.publicKey.generateSharedSecret()
-        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation
-            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation
+        let blob = sk.publicKey.rawRepresentation + sk.rawRepresentation.makeData()
+            + sealed.ciphertext + sealed.sharedSecret.rawRepresentation.makeData()
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "HQC-1")))
     }
 
@@ -167,7 +167,7 @@ import Foundation
         let blob: Data = try onLargeStack {
             let key = try MQOM2Cat1GF16FastR3.PrivateKey()
             let sig = try key.signature(for: Data("KAT".utf8))
-            return key.publicKey.rawRepresentation + key.rawRepresentation + sig
+            return key.publicKey.rawRepresentation + key.rawRepresentation.makeData() + sig
         }
         #expect(KAT.sha3_256Hex(blob) == (try KATHashes.shared.hash(for: "mqom2_cat1_gf16_fast_r3")))
     }

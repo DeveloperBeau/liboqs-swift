@@ -4,4 +4,5 @@ import Foundation
 /// parity test uses.
 protocol ParitySigPublicKey {
     var rawRepresentation: Data { get }
+    func isValidSignature(_ signature: Data, for data: Data) throws -> Bool
 }

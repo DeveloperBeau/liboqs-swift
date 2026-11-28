@@ -441,7 +441,7 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
         let key = try Falcon512.PrivateKey()
         #expect(throws: OQSError.self) {
             try Falcon512.PrivateKey(
-                rawRepresentation: Data([0x00]),
+                rawRepresentation: SecretBytes(copying: Data([0x00])),
                 publicKeyRepresentation: key.publicKey.rawRepresentation
             )
         }
@@ -507,7 +507,7 @@ private let testMessage = Data("Post-quantum cryptography is fun.".utf8)
         #expect(throws: OQSError.self) {
             try SLHDSA.Prehash.PrivateKey(
                 prehash: .sha2_256, paramSet: .sha2_128f,
-                rawRepresentation: Data([0x00]),
+                rawRepresentation: SecretBytes(copying: Data([0x00])),
                 publicKeyRepresentation: Data([0x00])
             )
         }

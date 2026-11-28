@@ -82,7 +82,7 @@ public enum SLHDSA: Sendable {
         /// )
         /// ```
         public struct PrivateKey: Sendable {
-            public let rawRepresentation: Data
+            public let rawRepresentation: SecretBytes
             public let publicKey: PublicKey
             let algorithmName: String
 
@@ -97,7 +97,7 @@ public enum SLHDSA: Sendable {
 
             /// Reconstructs a key pair from previously saved raw secret and public key bytes.
             public init(prehash: Function, paramSet: ParamSet,
-                        rawRepresentation: Data, publicKeyRepresentation: Data) throws {
+                        rawRepresentation: SecretBytes, publicKeyRepresentation: Data) throws {
                 let name = Prehash.algorithmName(prehash, paramSet)
                 let lengths = try sigExpectedKeyLengths(algorithm: name)
                 guard rawRepresentation.count == lengths.secretKey else {

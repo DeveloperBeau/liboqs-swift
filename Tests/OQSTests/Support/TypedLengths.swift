@@ -29,23 +29,23 @@ struct TypedLengths: Equatable, CustomStringConvertible {
 
     static func kem<K: ParityKEMPrivateKey>(_: K.Type) throws -> TypedLengths {
         let pk = try expectedLength { _ = try K.Public(rawRepresentation: Data()) }
-        let sk = try expectedLength { _ = try K(rawRepresentation: Data(), publicKeyRepresentation: Data(count: pk)) }
+        let sk = try expectedLength { _ = try K(rawRepresentation: SecretBytes(copying: Data()), publicKeyRepresentation: Data(count: pk)) }
         // A key of the right sizes, so decapsulation reaches its ciphertext check.
-        let key = try K(rawRepresentation: Data(count: sk), publicKeyRepresentation: Data(count: pk))
+        let key = try K(rawRepresentation: SecretBytes(copying: Data(count: sk)), publicKeyRepresentation: Data(count: pk))
         let ct = try expectedLength { _ = try key.decryptSharedSecret(Data()) }
         return TypedLengths(publicKey: pk, secretKey: sk, output: ct)
     }
 
     static func signature<K: ParityImportableSigPrivateKey>(_: K.Type, name: String) throws -> TypedLengths {
         let pk = try expectedLength { _ = try K.Public(rawRepresentation: Data()) }
-        let sk = try expectedLength { _ = try K(rawRepresentation: Data(), publicKeyRepresentation: Data(count: pk)) }
+        let sk = try expectedLength { _ = try K(rawRepresentation: SecretBytes(copying: Data()), publicKeyRepresentation: Data(count: pk)) }
         return TypedLengths(publicKey: pk, secretKey: sk, output: try sigExpectedKeyLengths(algorithm: name).signature)
     }
 
     static func prehash(_ fn: SLHDSA.Prehash.Function, _ ps: SLHDSA.Prehash.ParamSet) throws -> TypedLengths {
         let pk = try expectedLength { _ = try SLHDSA.Prehash.PublicKey(prehash: fn, paramSet: ps, rawRepresentation: Data()) }
         let sk = try expectedLength {
-            _ = try SLHDSA.Prehash.PrivateKey(prehash: fn, paramSet: ps, rawRepresentation: Data(), publicKeyRepresentation: Data(count: pk))
+            _ = try SLHDSA.Prehash.PrivateKey(prehash: fn, paramSet: ps, rawRepresentation: SecretBytes(copying: Data()), publicKeyRepresentation: Data(count: pk))
         }
         let name = SLHDSA.Prehash.algorithmName(fn, ps)
         return TypedLengths(publicKey: pk, secretKey: sk, output: try sigExpectedKeyLengths(algorithm: name).signature)

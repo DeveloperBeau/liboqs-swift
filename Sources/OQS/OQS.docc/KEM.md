@@ -37,6 +37,8 @@ let symmetricKey = SymmetricKey(data: sharedSecret.rawRepresentation)
 let encrypted = try AES.GCM.seal(plaintext, using: symmetricKey)
 ```
 
+The shared secret is a ``SecretBytes`` value. Its bytes are wiped from memory when the last reference goes away. Comparing two shared secrets with `==` takes the same time wherever they differ.
+
 > The shared secret should be used immediately or stored securely.
 > Never transmit it. The entire point of key encapsulation is that
 > both parties derive it independently.
@@ -47,16 +49,18 @@ Keys can be exported and imported using raw byte representations:
 
 ```swift
 // Export
-let keyData = privateKey.rawRepresentation
+let keyData = privateKey.rawRepresentation.makeData()
 let pubData = privateKey.publicKey.rawRepresentation
 
 // Import
 let imported = try MLKEM768.PrivateKey(
-    rawRepresentation: keyData,
+    rawRepresentation: SecretBytes(copying: keyData),
     publicKeyRepresentation: pubData
 )
 let importedPub = try MLKEM768.PublicKey(rawRepresentation: pubData)
 ```
+
+`makeData()` and `SecretBytes(copying:)` both copy the bytes. The `Data` you pass in or get out is yours to wipe. The package does not wipe it.
 
 ### Seeded Key Generation
 

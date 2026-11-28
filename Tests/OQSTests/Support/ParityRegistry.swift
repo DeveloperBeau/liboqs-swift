@@ -25,31 +25,35 @@ enum ParityRegistry {
             let enc = try key.publicKey.generateSharedSecret()
             let ss2 = try key.decryptSharedSecret(enc.ciphertext)
             return [
-                ("pk", key.publicKey.rawRepresentation), ("sk", key.rawRepresentation),
-                ("ct", enc.ciphertext), ("ss", enc.sharedSecret.rawRepresentation),
-                ("ss2", ss2.rawRepresentation),
+                ("pk", key.publicKey.rawRepresentation), ("sk", key.rawRepresentation.makeData()),
+                ("ct", enc.ciphertext), ("ss", enc.sharedSecret.rawRepresentation.makeData()),
+                ("ss2", ss2.rawRepresentation.makeData()),
             ]
-        }, typedLengths: { try TypedLengths.kem(K.self) })
+        }, typedLengths: { try TypedLengths.kem(K.self) },
+        secretFlow: { try SecretFlow.kem(make) })
     }
 
     // Signature base case: keygen, reseed, sign `message`.
     private static func sig<K: ParitySigPrivateKey>(
         _ name: String, _ make: @escaping @Sendable () throws -> K,
-        typedLengths: @escaping @Sendable () throws -> TypedLengths
+        typedLengths: @escaping @Sendable () throws -> TypedLengths,
+        rebuild: @escaping @Sendable (SecretBytes, Data) throws -> K
     ) -> ParityAlgorithm {
         ParityAlgorithm(name: name, run: {
             KAT.seedDeterministicRNG()
             let key = try make()
             KAT.seedDeterministicRNG()
             let sg = try key.signature(for: message)
-            return [("pk", key.publicKey.rawRepresentation), ("sk", key.rawRepresentation), ("sig", sg)]
-        }, typedLengths: typedLengths)
+            return [("pk", key.publicKey.rawRepresentation), ("sk", key.rawRepresentation.makeData()), ("sig", sg)]
+        }, typedLengths: typedLengths,
+        secretFlow: { try SecretFlow.signature(make, rebuild: rebuild) })
     }
 
     private static func sig<K: ParityImportableSigPrivateKey>(
         _ name: String, _ make: @escaping @Sendable () throws -> K
     ) -> ParityAlgorithm {
-        sig(name, make, typedLengths: { try TypedLengths.signature(K.self, name: name) })
+        sig(name, make, typedLengths: { try TypedLengths.signature(K.self, name: name) },
+            rebuild: { try K(rawRepresentation: $0, publicKeyRepresentation: $1) })
     }
 
     static func kems() -> [ParityAlgorithm] {
@@ -105,7 +109,8 @@ enum ParityRegistry {
                 sig(
                     SLHDSA.Prehash.algorithmName(fn, ps),
                     { try SLHDSA.Prehash.PrivateKey(prehash: fn, paramSet: ps) },
-                    typedLengths: { try TypedLengths.prehash(fn, ps) })
+                    typedLengths: { try TypedLengths.prehash(fn, ps) },
+                    rebuild: { try SLHDSA.Prehash.PrivateKey(prehash: fn, paramSet: ps, rawRepresentation: $0, publicKeyRepresentation: $1) })
             }
         }
         return prehash + [

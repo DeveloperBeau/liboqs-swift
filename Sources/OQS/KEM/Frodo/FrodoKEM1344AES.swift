@@ -43,8 +43,8 @@ public enum FrodoKEM1344AES: Sendable {
 
     /// A FrodoKEM-1344-AES private (decapsulation) key.
     public struct PrivateKey: Sendable {
-        /// The raw key bytes.
-        public let rawRepresentation: Data
+        /// The secret key bytes, held in storage that is wiped when the key is released.
+        public let rawRepresentation: SecretBytes
         /// The corresponding public key.
         public let publicKey: PublicKey
 
@@ -56,7 +56,7 @@ public enum FrodoKEM1344AES: Sendable {
         }
 
         /// Imports a private key from raw bytes.
-        public init(rawRepresentation: Data, publicKeyRepresentation: Data) throws {
+        public init(rawRepresentation: SecretBytes, publicKeyRepresentation: Data) throws {
             let lengths = try kemExpectedKeyLengths(algorithm: FrodoKEM1344AES.algorithmName)
             guard rawRepresentation.count == lengths.secretKey else {
                 throw OQSError.invalidKeySize(expected: lengths.secretKey, actual: rawRepresentation.count)

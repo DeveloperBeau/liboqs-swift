@@ -26,6 +26,8 @@ import Foundation
         ("SharedTypes/OQSError.swift", []),
         ("SharedTypes/SharedSecret.swift", ["Foundation"]),
         ("SharedTypes/SharedSecretResult.swift", ["Foundation"]),
+        ("SharedTypes/SecretBytes.swift", ["Foundation"]),
+        ("SharedTypes/SecretMemoryManaging.swift", ["Foundation"]),
     ]
 
     private static func source(_ file: String) throws -> String {
@@ -81,8 +83,8 @@ import Foundation
         for file in found {
             #expect(listed.contains(file), "\(file) is not on the entity list")
         }
-        // The three description types and the three older shared types.
-        #expect(found.count == 6, "found \(found.sorted())")
+        // The three description types, the three older shared types and the two secret storage files.
+        #expect(found.count == 8, "found \(found.sorted())")
     }
 
     @Test("The import scan finds imports in every form and ignores comments and lines that are not imports")

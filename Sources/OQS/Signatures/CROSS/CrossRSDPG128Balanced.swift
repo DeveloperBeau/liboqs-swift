@@ -29,7 +29,7 @@ public enum CrossRSDPG128Balanced: Sendable {
     static let algorithmName = "cross-rsdpg-128-balanced"
 
     public struct PrivateKey: Sendable {
-        public let rawRepresentation: Data
+        public let rawRepresentation: SecretBytes
         public let publicKey: PublicKey
 
         public init() throws {
@@ -38,7 +38,7 @@ public enum CrossRSDPG128Balanced: Sendable {
             self.publicKey = PublicKey(unchecked: kp.publicKey)
         }
 
-        public init(rawRepresentation: Data, publicKeyRepresentation: Data) throws {
+        public init(rawRepresentation: SecretBytes, publicKeyRepresentation: Data) throws {
             let lengths = try sigExpectedKeyLengths(algorithm: CrossRSDPG128Balanced.algorithmName)
             guard rawRepresentation.count == lengths.secretKey else {
                 throw OQSError.invalidKeySize(expected: lengths.secretKey, actual: rawRepresentation.count)

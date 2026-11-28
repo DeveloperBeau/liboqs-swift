@@ -87,6 +87,24 @@ let secret = try aliceKey.decryptSharedSecret(ciphertext)
 let symmetricKey = SymmetricKey(data: secret.rawRepresentation)
 ```
 
+### Secret keys and shared secrets
+
+Private keys and shared secrets keep their bytes in a `SecretBytes` value. The bytes are wiped from memory when the last reference goes away. Comparing two shared secrets with `==` takes the same time wherever they differ.
+
+```swift
+// Read the bytes without a copy
+let symmetricKey = SymmetricKey(data: secret.rawRepresentation)
+
+// Save a private key, then load it again
+let saved: Data = aliceKey.rawRepresentation.makeData()
+let loaded = try MLKEM768.PrivateKey(
+    rawRepresentation: SecretBytes(copying: saved),
+    publicKeyRepresentation: aliceKey.publicKey.rawRepresentation
+)
+```
+
+`makeData()` and `SecretBytes(copying:)` both copy the bytes. The `Data` you pass in or get out is yours to wipe. The package does not wipe it.
+
 ### Seeded key generation
 
 ML-KEM can also derive a key pair or an encapsulation from a seed. The same seed always gives the same output.

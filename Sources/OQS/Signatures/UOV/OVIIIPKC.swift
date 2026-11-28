@@ -33,7 +33,7 @@ public enum OVIIIPKC: Sendable {
     static let algorithmName = "OV-III-pkc"
 
     public struct PrivateKey: Sendable {
-        public let rawRepresentation: Data
+        public let rawRepresentation: SecretBytes
         public let publicKey: PublicKey
 
         public init() throws {
@@ -42,7 +42,7 @@ public enum OVIIIPKC: Sendable {
             self.publicKey = PublicKey(unchecked: kp.publicKey)
         }
 
-        public init(rawRepresentation: Data, publicKeyRepresentation: Data) throws {
+        public init(rawRepresentation: SecretBytes, publicKeyRepresentation: Data) throws {
             let lengths = try sigExpectedKeyLengths(algorithm: OVIIIPKC.algorithmName)
             guard rawRepresentation.count == lengths.secretKey else {
                 throw OQSError.invalidKeySize(expected: lengths.secretKey, actual: rawRepresentation.count)
