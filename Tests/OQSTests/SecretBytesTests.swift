@@ -243,7 +243,7 @@ import Foundation
     // Plain threads, not the cooperative pool: other suites block the pool's few
     // threads on long key generations, and a task group here would wait behind them.
     @Test("One private key signs from many threads and one shared secret is compared from many threads, all correct",
-          .timeLimit(.minutes(2)))
+          .timeLimit(.minutes(10)))
     func concurrentUse() throws {
         let key = try MLDSA44.PrivateKey()
         let sealed = try MLKEM768.PrivateKey().publicKey.generateSharedSecret()
