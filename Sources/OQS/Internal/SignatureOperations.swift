@@ -92,30 +92,30 @@ func sigVerify(algorithm: String, message: Data, signature: Data, publicKey: Dat
         throw OQSError.invalidKeySize(expected: expectedPK, actual: publicKey.count)
     }
 
-    #if OQS_SAFE_INTEROP
-    let rc = message.withUnsafeBytes { msg in
-        signature.withUnsafeBytes { sigBuf in
+    // Signature length is checked here, not left to liboqs: for some schemes
+    // liboqs reads the signature before it checks the length.
+    let ok = withVerifiableSignature(signature, maxLength: Int(sig.pointee.length_signature)) { sigBuf in
+        #if OQS_SAFE_INTEROP
+        message.withUnsafeBytes { msg in
             publicKey.withUnsafeBytes { pk in
-                oqs_sig_verify_safe(sig, msg, sigBuf, pk)
+                oqs_sig_verify_safe(sig, msg, sigBuf, pk) == OQS_SUCCESS
             }
         }
-    }
-    #else
-    let rc = message.withUnsafeBytes { msg in
-        signature.withUnsafeBytes { sigBuf in
+        #else
+        message.withUnsafeBytes { msg in
             publicKey.withUnsafeBytes { pk in
                 OQS_SIG_verify(sig,
                     msg.baseAddress?.assumingMemoryBound(to: UInt8.self),
                     message.count,
                     sigBuf.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                    signature.count,
-                    pk.baseAddress?.assumingMemoryBound(to: UInt8.self))
+                    sigBuf.count,
+                    pk.baseAddress?.assumingMemoryBound(to: UInt8.self)) == OQS_SUCCESS
             }
         }
+        #endif
     }
-    #endif
 
-    return rc == OQS_SUCCESS
+    return ok
 }
 
 func sigExpectedKeyLengths(algorithm: String) throws -> (publicKey: Int, secretKey: Int, signature: Int) {
