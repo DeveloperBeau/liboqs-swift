@@ -18,6 +18,13 @@ private func fresh(_ bytes: some Collection<UInt8>) -> Data {
 
 private let longExtra = 4096
 
+/// True when `bad` is the valid signature with only trailing zero bytes cut off.
+/// Some schemes, such as padded Falcon, end the signature in zero padding, so
+/// this is the same signature and not a forgery.
+private func isValidWithoutTrailingZeros(_ bad: [UInt8], valid: [UInt8]) -> Bool {
+    bad.count <= valid.count && bad + [UInt8](repeating: 0, count: valid.count - bad.count) == valid
+}
+
 /// The names of the stateless signature types, from the registry of public types.
 private let statelessNames: [String] = ParityRegistry.sigs().filter { $0.signed != nil }.map(\.name)
 
@@ -69,6 +76,7 @@ private func lengthProblems(_ name: String, _ sample: SignedSample) -> [String] 
     func expect(_ label: String, _ signature: Data, accepted: Bool) {
         do {
             let got = try sample.verify(signature)
+            if !accepted, got, isValidWithoutTrailingZeros(Array(signature), valid: valid) { return }
             if got != accepted { problems.append("\(name): \(label) gave \(got), expected \(accepted)") }
         } catch {
             problems.append("\(name): \(label) threw \(error)")
@@ -227,7 +235,7 @@ private func lengthProblems(_ name: String, _ sample: SignedSample) -> [String] 
                 bad[Int.random(in: 0..<bad.count, using: &rng)] ^= UInt8.random(in: 1...255, using: &rng)
             }
             // False positive check: a mutated signature is never accepted.
-            if (try? sample.verify(fresh(bad))) == true {
+            if (try? sample.verify(fresh(bad))) == true, !isValidWithoutTrailingZeros(bad, valid: valid) {
                 problems.append("\(name) iteration \(i): \(kind) signature accepted, seed \(seed)")
             }
             // False negative check: the untouched signature is always accepted.
